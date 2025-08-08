@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -18,15 +19,11 @@ public class JwtTokenProvider {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
-    @Value("${custom.jwt.secretKey}")
-    private String secretKey;
-
     private final SecretKey key;
 
     // SecretKey 초기화 (한 번만 생성)
     public JwtTokenProvider(@Value("${custom.jwt.secretKey}") String secretKey) {
-        this.secretKey = secretKey;
-        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
