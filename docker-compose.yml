@@ -1,0 +1,170 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: dm-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: meta_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: dm-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: dm-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://localhost:9092
+    ports:
+      - "9092:9092"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  redpanda_data:
+
+
+
+# prod
+
+#version: '3.8'
+#services:
+#  redis:
+#    image: redis:latest
+#    container_name: dm-redis
+#    volumes:
+#      - redis-data:/data
+#    command: >
+#      redis-server --appendonly yes
+#                   --bind 0.0.0.0
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "ping" ]
+#      interval: 5s
+#      timeout: 3s
+#      retries: 5
+#      start_period: 3s
+#    networks:
+#      - dm-backend
+#
+#  postgres:
+#    image: postgres:latest
+#    container_name: dm-postgres
+#    restart: always
+#    environment:
+#      POSTGRES_USER: dmAdmin
+#      POSTGRES_PASSWORD: dmAdmin0806
+#      POSTGRES_DB: meta_db
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#
+#  redpanda:
+#    image: docker.redpanda.com/redpandadata/redpanda:latest
+#    container_name: dm-redpanda
+#    restart: unless-stopped
+#    command:
+#      - redpanda
+#      - start
+#      - --mode
+#      - dev-container
+#      - --smp
+#      - "1"
+#      - --memory
+#      - 256M
+#      - --reserve-memory
+#      - 128M
+#      - --default-log-level=warn
+#      - --kafka-addr
+#      - PLAINTEXT://0.0.0.0:9092
+#      - --advertise-kafka-addr
+#      - PLAINTEXT://dm-redpanda:9092
+#      - --pandaproxy-addr
+#      - 0.0.0.0:8082
+#      - --advertise-pandaproxy-addr
+#      - dm-redpanda:8082
+#      - --schema-registry-addr
+#      - 0.0.0.0:8081
+#      - --rpc-addr
+#      - 0.0.0.0:33145
+#      - --advertise-rpc-addr
+#      - dm-redpanda:33145
+#    ports:
+#      - "9092:9092"     # Kafka API
+#      - "8081:8081"     # Schema Registry
+#      - "8082:8082"     # PandaProxy
+#      - "9644:9644"     # Admin API
+#    volumes:
+#      - redpanda-data:/var/lib/redpanda/data
+#    networks:
+#      - dm-backend
+#
+#  app:
+#    image: junhui9789/dm-app:latest
+#    container_name: dm-app
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - ./env/.env
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=prod
+#      - DOTENV_PATH=/app/env
+#    volumes:
+#      - ./env/.env:/app/.env
+#      - ./env/fcm-service-account.json:/app/fcm-service-account.json
+#    depends_on:
+#      redis:
+#        condition: service_healthy  # Redis가 정상 작동할 때까지 대기
+#      postgres:
+#        condition: service_started  # Postgres가 정상 작동할 때까지 대기
+#    networks:
+#      - dm-backend
+#      - dm-proxy
+#
+#  nginx-proxy-manager:
+#    image: 'jc21/nginx-proxy-manager:latest'
+#    container_name: dm-npm
+#    restart: unless-stopped
+#    ports:
+#      - '80:80'    # HTTP 포트
+#      - '443:443'  # HTTPS 포트
+#      - '81:81'    # 관리자 웹 인터페이스 포트
+#    volumes:
+#      - ./data:/data
+#      - ./letsencrypt:/etc/letsencrypt
+#    networks:
+#      - dm-proxy
+#
+#volumes:
+#  redis-data:
+#  redpanda-data:
+#  postgres-data:
+#
+#networks:
+#  dm-backend:
+#    driver: bridge
+#  dm-proxy:
+#    driver: bridge

@@ -1,0 +1,73 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/meta_db
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show-sql: true      # SQL 쿼리 로깅 (개발 중에만 true)
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/meta_db?authSource=admin
+      database: meta_db
+  kafka:
+    bootstrap-servers: localhost:9092
+
+app:
+  oauth2:
+    providers:
+      google:
+        clientId: ${GOOGLE_CLIENT_ID}
+        clientSecret: ${GOOGLE_CLIENT_SECRET}
+        redirectUri: "http://localhost:8080/rest-api/v1/oauth2/google"
+        tokenUri: "https://oauth2.googleapis.com/token"
+        userInfoUri: "https://www.googleapis.com/oauth2/v3/userinfo"
+      naver:
+        clientId: ${NAVER_CLIENT_ID}
+        clientSecret: ${NAVER_CLIENT_SECRET}
+        redirectUri: "http://localhost:8080/rest-api/v1/oauth2/naver"
+        tokenUri: "https://nid.naver.com/oauth2.0/token"
+        userInfoUri: "https://openapi.naver.com/v1/nid/me"
+      kakao:
+        clientId: ${KAKAO_CLIENT_ID}
+        redirectUri: "http://localhost:8080/rest-api/v1/oauth2/kakao"
+        tokenUri: "https://kauth.kakao.com/oauth/token"
+        userInfoUri: "https://kapi.kakao.com/v2/user/me"
+
+frontend:
+  oauth-redirect: http://localhost:5173/login
+
+fcm:
+  service-account-file: classpath:fcm-service-account.json
+  project-id:
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+    groups-order: DESC
+    operations-sorter: method
+    tags-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.iEdu: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
