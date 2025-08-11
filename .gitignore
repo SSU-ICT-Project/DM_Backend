@@ -38,7 +38,7 @@ out/
 
 ### Custom ###
 .env
-fcm-service-account.json
+fcm-private-key.json
 /src/main/generated/
 
 # Terraform 상태 파일

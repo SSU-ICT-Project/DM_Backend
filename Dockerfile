@@ -8,7 +8,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
 WORKDIR /app
 
 # JAR 파일 복사
-COPY build/libs/iEdu-0.0.1-SNAPSHOT.jar app.jar
+COPY build/libs/DM_Backend-0.0.1-SNAPSHOT.jar app.jar
 
 # 환경 변수 설정 (Spring 프로파일 & 시간대)
 ENV SPRING_PROFILES_ACTIVE=prod
