@@ -61,8 +61,7 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
 
     // fcm
-    implementation("com.squareup.okhttp3:okhttp:4.12.0") // 최신 안정 버전
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation("com.google.firebase:firebase-admin:9.5.0")
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")

@@ -128,13 +128,13 @@ volumes:
 #    ports:
 #      - "8080:8080"
 #    env_file:
-#      - ./env/.env
+#      - ./app/.env
 #    environment:
 #      - SPRING_PROFILES_ACTIVE=prod
 #      - DOTENV_PATH=/app/env
 #    volumes:
-#      - ./env/.env:/app/.env
-#      - ./env/fcm-service-account.json:/app/fcm-service-account.json
+#      - ./app/.env:/app/.env
+#      - ./app/fcm-private-key.json:/app/fcm-private-key.json
 #    depends_on:
 #      redis:
 #        condition: service_healthy  # Redis가 정상 작동할 때까지 대기
