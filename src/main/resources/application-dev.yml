@@ -47,8 +47,8 @@ frontend:
   oauth-redirect: http://localhost:5173/login
 
 fcm:
-  service-account-file: classpath:fcm-service-account.json
-  project-id:
+  service-account-file: file:././././fcm-private-key.json
+  project-id: 910298565199
 
 springdoc:
   api-docs:
