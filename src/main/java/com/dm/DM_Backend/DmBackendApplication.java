@@ -31,5 +31,4 @@ public class DmBackendApplication {
 
         SpringApplication.run(DmBackendApplication.class, args);
 	}
-
 }
