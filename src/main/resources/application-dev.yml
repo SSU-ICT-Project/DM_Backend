@@ -50,6 +50,7 @@ fcm:
   service-account-file: file:././././fcm-private-key.json
   project-id: 910298565199
 
+
 springdoc:
   api-docs:
     enabled: true

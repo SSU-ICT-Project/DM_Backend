@@ -47,7 +47,9 @@ public class SecurityConfig {
                                 "/api/**",
                                 "/rest-api/v1/post/**",
                                 "/find-password/**",
-                                "/ws/**").permitAll()
+                                "/ws/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
