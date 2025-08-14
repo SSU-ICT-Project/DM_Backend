@@ -29,19 +29,3 @@ custom:
     expiration: "#{60 * 60 * 1000}"   # 1시간
   refreshToken:
     expiration: "#{60 * 60 * 24 * 7 * 1000}"   # 7일
-
-mail:
-  host: smtp.gmail.com
-  port: 587
-  username:
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
-          required: true
-        connection-timeout: 5000
-        timeout: 5000
-        write-timeout: 5000
-  code-expiration-millis: 600000  #코드 만료기간: 10분
