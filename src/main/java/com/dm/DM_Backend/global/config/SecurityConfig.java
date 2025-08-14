@@ -42,11 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/rest-api/v1/auth/login",
                                 "/rest-api/v1/oauth2/**",
-                                "/map-api/**",
                                 "/rest-api/v1/member",
-                                "/api/**",
-                                "/rest-api/v1/post/**",
-                                "/find-password/**",
                                 "/ws/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll()
@@ -79,9 +75,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://localhost:19006",
-                "https://www.letzgo.site",
-                "https://letzgo.site"
+                "http://localhost:19006"
         ));
         configuration.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "PATCH", "OPTION"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
