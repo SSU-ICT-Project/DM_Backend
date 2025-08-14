@@ -31,7 +31,7 @@ public class NotificationEventListener {
             "follow-topic", new NotificationMeta("팔로우 알림", "follow-topic-dlt")
     );
 
-    @KafkaListener(topics = {"comment-topic", "follow-topic", "post-topic"}, groupId = "1")
+    @KafkaListener(topics = {"follow-topic"}, groupId = "1")
     public void consume(ConsumerRecord<String, String> record) {
         String topic = record.topic();
         String message = record.value();

@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/rest-api/v1/auth/login",
                                 "/rest-api/v1/oauth2/**",
-                                "/rest-api/v1/member",
+                                "/rest-api/v1/member/**",
                                 "/ws/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll()
