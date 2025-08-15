@@ -35,8 +35,8 @@ public class ApiV1AuthController {
         return ApiResponse.of(ReturnCode.SUCCESS);
     }
 
-    // accessToken 재발급
-    @Operation(summary = "accessToken 재발급", description = "refresh 토큰을 사용하여 access 토큰을 재발급합니다.")
+    // AccessToken 재발급
+    @Operation(summary = "AccessToken 재발급", description = "Refresh 토큰을 사용하여 Access 토큰을 재발급합니다.")
     @GetMapping("/refresh-token")
     public ApiResponse<Auth> refreshToken(@RequestHeader("Authorization") String refreshToken, @LoginUser LoginUserDto loginUser) {
         return ApiResponse.of(authService.refreshToken(refreshToken, loginUser));
