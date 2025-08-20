@@ -58,6 +58,7 @@ public class MemberServiceImpl implements MemberService {
         String encodedPassword = memberForm.getPassword() != null ? passwordEncoder.encode(memberForm.getPassword()) : null;
         Member member = Member.builder()
                 .nickname(memberForm.getNickname())
+                .job(memberForm.getJob())
                 .email(memberForm.getEmail())
                 .password(encodedPassword)  // 인코딩된 비밀번호 저장
                 .motivationType(memberForm.getMotivationType())
