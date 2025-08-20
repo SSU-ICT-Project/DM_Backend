@@ -10,10 +10,10 @@ import software.amazon.awssdk.regions.Region;
 
 @Configuration
 public class S3Config {
-    @Value("${spring.aws.credentials.access-key}")
+    @Value("${spring.cloud.aws.credentials.access-key}")
     private String accessKeyId;
 
-    @Value("${spring.aws.credentials.secret-key}")
+    @Value("${spring.cloud.aws.credentials.secret-key}")
     private String secretAccessKey;
 
     @Bean

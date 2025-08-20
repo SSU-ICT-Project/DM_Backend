@@ -57,11 +57,10 @@ public class MemberServiceImpl implements MemberService {
         // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
         String encodedPassword = memberForm.getPassword() != null ? passwordEncoder.encode(memberForm.getPassword()) : null;
         Member member = Member.builder()
-                .name(memberForm.getName())
                 .nickname(memberForm.getNickname())
-                .phone(memberForm.getPhone())
                 .email(memberForm.getEmail())
                 .password(encodedPassword)  // 인코딩된 비밀번호 저장
+                .motivationType(memberForm.getMotivationType())
                 .gender(memberForm.getGender())
                 .birthday(memberForm.getBirthday())
                 .build();
@@ -124,14 +123,8 @@ public class MemberServiceImpl implements MemberService {
             }
             imageUrl = null;
         }
-        if (memberForm.getName() != null) {
-            loginUser.setName(memberForm.getName());
-        }
         if (memberForm.getNickname() != null) {
             loginUser.setNickname(memberForm.getNickname());
-        }
-        if (memberForm.getPhone() != null) {
-            loginUser.setPhone(memberForm.getPhone());
         }
         if (memberForm.getEmail() != null) {
             loginUser.setEmail(memberForm.getEmail());

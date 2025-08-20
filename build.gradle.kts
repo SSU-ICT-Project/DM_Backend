@@ -64,6 +64,25 @@ dependencies {
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+
+    // LangChain4j
+    // 1) BOM으로 버전 정렬
+    implementation(platform("dev.langchain4j:langchain4j-bom:1.3.0"))
+    // 2) 모듈들은 버전 제거 (BOM이 관리)
+    implementation("dev.langchain4j:langchain4j")
+    implementation("dev.langchain4j:langchain4j-core")
+    implementation("dev.langchain4j:langchain4j-open-ai")
+    implementation("dev.langchain4j:langchain4j-rag")
+    implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox")
+    // 3) HTTP 클라이언트 구현 ⇒ Spring RestClient만 남김
+    implementation("dev.langchain4j:langchain4j-http-client-spring-restclient")
+    configurations.all {
+        exclude(group = "dev.langchain4j", module = "langchain4j-http-client-jdk")
+    }
+    // 4) Spring Boot Starter는 최신 베타 버전 사용
+    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.3.0-beta9")
+    // 5) pgvector 추가
+    implementation("dev.langchain4j:langchain4j-pgvector:1.3.0-beta9")
 }
 
 tasks.withType<Test> {

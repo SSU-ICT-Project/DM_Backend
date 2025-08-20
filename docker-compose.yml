@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
+    image: ankane/pgvector:latest   # pgvector 확장 추가
     container_name: dm-postgres
     environment:
       POSTGRES_USER: admin
@@ -124,6 +124,17 @@ volumes:
 #    networks:
 #      - dm-backend
 #
+#  milvus:
+#    image: milvusdb/milvus:v2.3.1-standalone
+#    container_name: dm-milvus
+#    volumes:
+#      - milvus_data:/var/lib/milvus
+#    environment:
+#      - TZ=Asia/Seoul
+#    restart: unless-stopped
+#    networks:
+#      - dm-backend
+#
 #  app:
 #    image: junhui9789/dm-app:latest
 #    container_name: dm-app
@@ -164,6 +175,7 @@ volumes:
 #  redis-data:
 #  redpanda-data:
 #  postgres-data:
+#  milvus_data:
 #
 #networks:
 #  dm-backend:
