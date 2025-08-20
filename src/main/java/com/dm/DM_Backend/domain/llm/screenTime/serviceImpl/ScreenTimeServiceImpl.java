@@ -64,9 +64,9 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 {{context}}
     
                 요구사항:
-                - {{motivation_type}} 에 맞게 50자 내외 한국어 메시지를 작성하세요.
+                - {{motivation_type}} 에 맞게 70자 내외 한국어 메시지를 작성하세요.
                 - 디지털 과사용 (숏폼 중독, 습관적 sns 사용)으로 인해 일상에 지장이 생기는 사람들을 위해
-                  사용자의 성향과 정보에 맞춘 동기부여 메시지를 제공하세요.
+                  사용자의 성향과 정보(나이, 성별, 직업)에 맞춘 동기부여 메시지를 제공하세요.
                 - 긍정적이고 행동을 유도하는 톤을 유지하세요.
                 """
         );

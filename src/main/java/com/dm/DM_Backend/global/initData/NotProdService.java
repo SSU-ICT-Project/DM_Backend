@@ -37,12 +37,14 @@ public class NotProdService {
     // 유저 1, 2, 3, 4, 5 생성
     private List<Member> createMembers() {
         List<String> names = List.of("서울", "인천", "강릉", "부산", "제주");
+        List<String> jobs = List.of("개발자", "의사", "파일럿", "변호사", "모델");
         List<String> nicknames = List.of("seoul_gangnam", "incheon_songdo", "gangneung_beach", "busan_haeundae", "jeju_seaside");
         Member.MotivationType[] motivationTypes = Member.MotivationType.values();
         List<Member> members = new ArrayList<>();
         for (int i = 0; i < names.size(); i++) {
             MemberForm memberForm = MemberForm.builder()
                     .nickname(nicknames.get(i))
+                    .job(jobs.get(i))
                     .email("user" + (i + 1) + "@example.com")
                     .password("1234")
                     .motivationType(motivationTypes[i % motivationTypes.length])
@@ -60,6 +62,7 @@ public class NotProdService {
         MemberForm memberForm = MemberForm.builder()
                 .nickname("test6")
                 .email("uichan0610@gmail.com")
+                .job(jobs.get(0))
                 .password("1234")
                 .motivationType(Member.MotivationType.VISION)
                 .gender(Member.Gender.MALE)
