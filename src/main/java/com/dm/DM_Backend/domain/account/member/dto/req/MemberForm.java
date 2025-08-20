@@ -13,11 +13,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberForm {
-    private String name;
     private String nickname;
-    private String phone;
+    private String job;
     private String email;
     private String password;
+    private Member.MotivationType motivationType;
     private Member.Gender gender;
     private LocalDate birthday;
 }

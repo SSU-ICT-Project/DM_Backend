@@ -18,7 +18,7 @@ import java.util.UUID;
 public class S3Service {
     private final S3Client s3Client;
 
-    @Value("${spring.aws.credentials.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String BUCKET_NAME;
 
     public String uploadFile(MultipartFile file, String dirName) throws IOException {
