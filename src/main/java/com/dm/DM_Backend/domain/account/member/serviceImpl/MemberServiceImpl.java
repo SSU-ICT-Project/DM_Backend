@@ -298,7 +298,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    // LoginUser를 MemberInfo로 변환
+    // LoginUser를 MemberDto로 변환
     private MemberDto loginUserConvertToMemberInfo(LoginUserDto loginUser) {
         return MemberDto.builder()
                 .id(loginUser.getId())
@@ -310,7 +310,7 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // Member를 MemberInfo로 변환
+    // Member를 MemberDto로 변환
     private MemberDto memberConvertToMemberInfo(Member member) {
         return MemberDto.builder()
                 .id(member.getId())
@@ -322,14 +322,16 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // LoginUser를 DetailMemberInfo로 변환
+    // LoginUser를 DetailMemberDto로 변환
     private DetailMemberDto loginUserConvertToDetailMemberInfo(LoginUserDto loginUser) {
         return DetailMemberDto.builder()
                 .id(loginUser.getId())
                 .name(loginUser.getName())
                 .nickname(loginUser.getNickname())
+                .job(loginUser.getJob())
                 .phone(loginUser.getPhone())
                 .email(loginUser.getEmail())
+                .motivationType(loginUser.getMotivationType())
                 .gender(loginUser.getGender())
                 .birthday(loginUser.getBirthday())
                 .profileImageUrl(loginUser.getProfileImageUrl())
@@ -382,14 +384,16 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // Member를 DetailMemberInfo로 변환
+    // Member를 DetailMemberDto로 변환
     private DetailMemberDto memberConvertToDetailMemberInfo(Member member) {
         return DetailMemberDto.builder()
                 .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
+                .job(member.getJob())
                 .phone(member.getPhone())
                 .email(member.getEmail())
+                .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .birthday(member.getBirthday())
                 .profileImageUrl(member.getProfileImageUrl())
