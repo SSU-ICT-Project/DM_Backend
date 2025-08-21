@@ -13,9 +13,11 @@ public class DetailMemberDto {
     private Long id;
     private String name;
     private String nickname;
+    private String job;
     private String phone;
     private String email;
     private String password;
+    private Member.MotivationType motivationType;
     private Member.Gender gender;  // 성별
     private LocalDate birthday;
     private String profileImageUrl;

@@ -60,13 +60,13 @@ public class ApiV1OAuth2Controller {
             socialLoginForm = LoginForm.builder().email(email).build();
         } else {
             MemberForm memberForm = MemberForm.builder()
+                    .nickname(null)
+                    .job(null)
                     .email(email)
-                    .name(name)
-                    .nickname(name)
-                    .phone(null)
+                    .password(null)
+                    .motivationType(null)
                     .gender(null)
                     .birthday(null)
-                    .password("")
                     .build();
             Member newMember = memberService.signup(memberForm);
             socialLoginForm = LoginForm.builder().email(newMember.getEmail()).build();

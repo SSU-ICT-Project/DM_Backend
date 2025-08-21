@@ -32,6 +32,7 @@ public class DmBackendApplication {
         System.setProperty("NAVER_CLIENT_ID", dotenv.get("NAVER_CLIENT_ID"));
         System.setProperty("NAVER_CLIENT_SECRET", dotenv.get("NAVER_CLIENT_SECRET"));
         System.setProperty("MAIL_APP_PASSWORD", dotenv.get("MAIL_APP_PASSWORD"));
+        System.setProperty("GPT_API_KEY", dotenv.get("GPT_API_KEY"));
 
         SpringApplication.run(DmBackendApplication.class, args);
 	}

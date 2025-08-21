@@ -19,6 +19,16 @@ spring:
   kafka:
     bootstrap-servers: ${REDPANDA_HOST}:9092
 
+vectorstore:
+  pg:
+    host: ${POSTGRES_HOST}
+    port: 5432
+    database: meta_db
+    user: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    tableName: screen_time_embeddings
+    dimension: 1536          # text-embedding-3-small
+
 app:
   oauth2:
     providers:

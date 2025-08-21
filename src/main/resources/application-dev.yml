@@ -16,11 +16,18 @@ spring:
     redis:
       host: localhost
       port: 6379
-    mongodb:
-      uri: mongodb://admin:admin@localhost:27017/meta_db?authSource=admin
-      database: meta_db
   kafka:
     bootstrap-servers: localhost:9092
+
+vectorstore:
+  pg:
+    host: localhost          # ← jdbc url에서 추출
+    port: 5432
+    database: meta_db
+    user: admin
+    password: admin
+    tableName: screen_time_embeddings
+    dimension: 1536          # text-embedding-3-small
 
 app:
   oauth2:
@@ -49,7 +56,6 @@ frontend:
 fcm:
   service-account-file: file:././././fcm-private-key.json
   project-id: 910298565199
-
 
 springdoc:
   api-docs:

@@ -37,15 +37,17 @@ public class NotProdService {
     // 유저 1, 2, 3, 4, 5 생성
     private List<Member> createMembers() {
         List<String> names = List.of("서울", "인천", "강릉", "부산", "제주");
+        List<String> jobs = List.of("개발자", "의사", "파일럿", "변호사", "모델");
         List<String> nicknames = List.of("seoul_gangnam", "incheon_songdo", "gangneung_beach", "busan_haeundae", "jeju_seaside");
+        Member.MotivationType[] motivationTypes = Member.MotivationType.values();
         List<Member> members = new ArrayList<>();
         for (int i = 0; i < names.size(); i++) {
             MemberForm memberForm = MemberForm.builder()
-                    .name(names.get(i))
                     .nickname(nicknames.get(i))
-                    .phone("010-" + (i + 1) + (i + 1) + (i + 1) + (i + 1) + "-" + (i + 1) + (i + 1) + (i + 1) + (i + 1))
+                    .job(jobs.get(i))
                     .email("user" + (i + 1) + "@example.com")
                     .password("1234")
+                    .motivationType(motivationTypes[i % motivationTypes.length])
                     .gender(i % 2 == 0 ? Member.Gender.MALE : Member.Gender.FEMALE)
                     .birthday(LocalDate.of(2001, i + 1, 1))
                     .build();
@@ -58,11 +60,11 @@ public class NotProdService {
 
         //이메일인증 테스트용 유저6
         MemberForm memberForm = MemberForm.builder()
-                .name("test6")
                 .nickname("test6")
-                .phone("010-1234-4321")
                 .email("uichan0610@gmail.com")
+                .job(jobs.get(0))
                 .password("1234")
+                .motivationType(Member.MotivationType.VISION)
                 .gender(Member.Gender.MALE)
                 .birthday(LocalDate.of(2001,01,01))
                 .build();
