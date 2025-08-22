@@ -5,7 +5,6 @@ import com.dm.DM_Backend.domain.account.member.entity.Member;
 import com.dm.DM_Backend.domain.llm.ingest.service.IngestService;
 import com.dm.DM_Backend.domain.llm.thesis.dto.res.ThesisResponse;
 import com.dm.DM_Backend.domain.llm.thesis.entity.Thesis;
-import com.dm.DM_Backend.domain.llm.thesis.entity.ThesisPage;
 import com.dm.DM_Backend.domain.llm.thesis.repository.ThesisRepository;
 import com.dm.DM_Backend.global.exception.ReturnCode;
 import com.dm.DM_Backend.global.exception.ServiceException;
@@ -116,14 +115,6 @@ public class IngestServiceImpl implements IngestService {
     }
 
     // ----------------- 헬퍼 메서드 -----------------
-
-    // 요청 페이지 수 제한
-    private void checkPageSize(int pageSize) {
-        int maxPageSize = ThesisPage.getMaxPageSize();
-        if (pageSize > maxPageSize) {
-            throw new ServiceException(ReturnCode.PAGE_REQUEST_FAIL);
-        }
-    }
 
     // ROLE_ADMIN 아닌 경우 예외 처리
     public static void validateAdminRole(LoginUserDto loginUser) {
