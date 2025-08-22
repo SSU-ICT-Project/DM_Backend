@@ -2,6 +2,7 @@ package com.dm.DM_Backend.domain.account.member.serviceImpl;
 
 import com.dm.DM_Backend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.DM_Backend.domain.account.auth.service.AuthService;
+import com.dm.DM_Backend.domain.account.member.dto.req.AdminForm;
 import com.dm.DM_Backend.domain.account.member.dto.req.MemberForm;
 import com.dm.DM_Backend.domain.account.member.dto.res.DetailMemberDto;
 import com.dm.DM_Backend.domain.account.member.dto.res.MemberDto;
@@ -47,10 +48,32 @@ public class MemberServiceImpl implements MemberService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
+    // 회원가입 [가데이터/초기관리자 생성]
+    @Override
+    @Transactional
+    public void adminSignup(AdminForm adminForm) {
+        if (memberRepository.existsByEmail((adminForm.getEmail()))) {
+            throw new RuntimeException("이미 존재하는 이메일입니다.");
+        }
+        // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
+        String encodedPassword = adminForm.getPassword() != null ? passwordEncoder.encode(adminForm.getPassword()) : null;
+        Member member = Member.builder()
+                .nickname(adminForm.getNickname())
+                .job(adminForm.getJob())
+                .email(adminForm.getEmail())
+                .password(encodedPassword)
+                .motivationType(adminForm.getMotivationType())
+                .gender(adminForm.getGender())
+                .role(adminForm.getMemberRole())
+                .birthday(adminForm.getBirthday())
+                .build();
+        memberRepository.save(member);
+    }
+
     // 회원가입
     @Override
     @Transactional
-    public Member signup(MemberForm memberForm) {
+    public void signup(MemberForm memberForm) {
         if (memberRepository.existsByEmail((memberForm.getEmail()))) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
@@ -66,7 +89,6 @@ public class MemberServiceImpl implements MemberService {
                 .birthday(memberForm.getBirthday())
                 .build();
         memberRepository.save(member);
-        return member;
     }
 
     // 본인 회원정보 조회

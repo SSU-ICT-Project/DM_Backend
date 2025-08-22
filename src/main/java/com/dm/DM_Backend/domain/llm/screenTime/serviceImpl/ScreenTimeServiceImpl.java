@@ -35,8 +35,8 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     // 스크린타임리뷰 생성
     @Override
     @Transactional
-    public ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest request, LoginUserDto loginUser) {
-        String screenTimeData = request.getScreenTimeData();
+    public ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest, LoginUserDto loginUser) {
+        String screenTimeData = screenTimeReviewRequest.getScreenTimeData();
         String motivationType = mapMotivationType(loginUser.getMotivationType());
 //        String goalData = loginUser.getGoalData();   // 목표 데이터 필요
         LocalDate birthday = loginUser.getBirthday();
@@ -101,6 +101,9 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         return screenTimeConvertToScreenTimeReviewResponse(screenTime);
     }
 
+    // ----------------- 헬퍼 메서드 -----------------
+
+    // 동기부여 한글 매핑
     private String mapMotivationType(Member.MotivationType type) {
         return switch (type) {
             case EMOTIONAL -> "감성 자극형";
@@ -110,6 +113,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         };
     }
 
+    // 동기부여 프롬프트 매핑
     private String mapMotivationPrompt(Member.MotivationType type) {
         return switch (type) {
             case EMOTIONAL -> """

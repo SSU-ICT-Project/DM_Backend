@@ -6,5 +6,5 @@ import com.dm.DM_Backend.domain.llm.screenTime.dto.res.ScreenTimeReviewResponse;
 
 public interface ScreenTimeService {
     // 스크린타임리뷰 생성
-    ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest request, LoginUserDto loginUser);
+    ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest, LoginUserDto loginUser);
 }

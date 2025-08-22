@@ -37,7 +37,6 @@ public class S3Service {
 
     public void deleteFile(String fileUrl) {
         String fileName = extractFileName(fileUrl);
-
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(BUCKET_NAME)
                 .key(fileName)
