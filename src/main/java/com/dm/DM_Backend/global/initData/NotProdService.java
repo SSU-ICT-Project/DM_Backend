@@ -65,7 +65,7 @@ public class NotProdService {
                 .email("admin6@gmail.com")
                 .job(jobs.get(0))
                 .password("admin6")
-                .motivationType(Member.MotivationType.VISION)
+                .motivationType(Member.MotivationType.ACHIEVER)
                 .gender(Member.Gender.MALE)
                 .memberRole(Member.MemberRole.ROLE_ADMIN)
                 .birthday(LocalDate.of(2001,01,01))
