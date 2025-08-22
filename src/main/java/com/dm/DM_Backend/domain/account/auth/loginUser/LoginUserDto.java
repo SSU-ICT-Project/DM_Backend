@@ -16,9 +16,11 @@ public class LoginUserDto {
     private Long id;
     private String name;
     private String nickname;
+    private String job;
     private String phone;
     private String email;
     private String password;
+    private Member.MotivationType motivationType;
     private Member.Gender gender;
     private Member.State state;
     private Member.MemberRole role;
@@ -36,9 +38,11 @@ public class LoginUserDto {
                 .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
+                .job(member.getJob())
                 .phone(member.getPhone())
                 .email(member.getEmail())
                 .password(member.getPassword())
+                .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .state(member.getState())
                 .role(member.getRole())
@@ -58,9 +62,11 @@ public class LoginUserDto {
                 .id(this.id)
                 .name(this.name)
                 .nickname(this.nickname)
+                .job(this.job)
                 .phone(this.phone)
                 .email(this.email)
                 .password(this.password)
+                .motivationType(this.motivationType)
                 .gender(this.gender)
                 .state(this.state)
                 .role(this.role)

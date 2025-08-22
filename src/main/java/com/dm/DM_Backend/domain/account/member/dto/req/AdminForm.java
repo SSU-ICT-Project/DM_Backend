@@ -12,12 +12,13 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberForm {
+public class AdminForm {
     private String nickname;
     private String job;
     private String email;
     private String password;
     private Member.MotivationType motivationType;
     private Member.Gender gender;
+    private Member.MemberRole memberRole;
     private LocalDate birthday;
 }

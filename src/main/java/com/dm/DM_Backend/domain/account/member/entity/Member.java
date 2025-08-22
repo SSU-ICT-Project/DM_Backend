@@ -24,6 +24,9 @@ public class Member extends BaseEntity {
     @Column(length = 20)
     private String nickname;
 
+    @Column(length = 30)
+    private String job;
+
     @Column(length = 20)
     private String phone;
 
@@ -32,6 +35,16 @@ public class Member extends BaseEntity {
 
     @Column(length = 1000)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 11)
+    private MotivationType motivationType;
+    public enum MotivationType {
+        EMOTIONAL,   // 감성 자극형
+        VISION,      // 미래/비전 제시형
+        ACTION,      // 구체적 행동 제시형
+        COMPETITION  // 비교/경쟁 자극형
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(length = 6)
@@ -49,7 +62,7 @@ public class Member extends BaseEntity {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 9, nullable = false)
+    @Column(length = 10, nullable = false)
     @Builder.Default
     private MemberRole role = MemberRole.ROLE_USER;  // 권한 (관리자, 사용자)
     public enum MemberRole {

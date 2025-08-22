@@ -2,6 +2,7 @@ package com.dm.DM_Backend.domain.account.member.serviceImpl;
 
 import com.dm.DM_Backend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.DM_Backend.domain.account.auth.service.AuthService;
+import com.dm.DM_Backend.domain.account.member.dto.req.AdminForm;
 import com.dm.DM_Backend.domain.account.member.dto.req.MemberForm;
 import com.dm.DM_Backend.domain.account.member.dto.res.DetailMemberDto;
 import com.dm.DM_Backend.domain.account.member.dto.res.MemberDto;
@@ -47,26 +48,47 @@ public class MemberServiceImpl implements MemberService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
+    // 회원가입 [가데이터/초기관리자 생성]
+    @Override
+    @Transactional
+    public void adminSignup(AdminForm adminForm) {
+        if (memberRepository.existsByEmail((adminForm.getEmail()))) {
+            throw new RuntimeException("이미 존재하는 이메일입니다.");
+        }
+        // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
+        String encodedPassword = adminForm.getPassword() != null ? passwordEncoder.encode(adminForm.getPassword()) : null;
+        Member member = Member.builder()
+                .nickname(adminForm.getNickname())
+                .job(adminForm.getJob())
+                .email(adminForm.getEmail())
+                .password(encodedPassword)
+                .motivationType(adminForm.getMotivationType())
+                .gender(adminForm.getGender())
+                .role(adminForm.getMemberRole())
+                .birthday(adminForm.getBirthday())
+                .build();
+        memberRepository.save(member);
+    }
+
     // 회원가입
     @Override
     @Transactional
-    public Member signup(MemberForm memberForm) {
+    public void signup(MemberForm memberForm) {
         if (memberRepository.existsByEmail((memberForm.getEmail()))) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
         // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
         String encodedPassword = memberForm.getPassword() != null ? passwordEncoder.encode(memberForm.getPassword()) : null;
         Member member = Member.builder()
-                .name(memberForm.getName())
                 .nickname(memberForm.getNickname())
-                .phone(memberForm.getPhone())
+                .job(memberForm.getJob())
                 .email(memberForm.getEmail())
                 .password(encodedPassword)  // 인코딩된 비밀번호 저장
+                .motivationType(memberForm.getMotivationType())
                 .gender(memberForm.getGender())
                 .birthday(memberForm.getBirthday())
                 .build();
         memberRepository.save(member);
-        return member;
     }
 
     // 본인 회원정보 조회
@@ -124,14 +146,8 @@ public class MemberServiceImpl implements MemberService {
             }
             imageUrl = null;
         }
-        if (memberForm.getName() != null) {
-            loginUser.setName(memberForm.getName());
-        }
         if (memberForm.getNickname() != null) {
             loginUser.setNickname(memberForm.getNickname());
-        }
-        if (memberForm.getPhone() != null) {
-            loginUser.setPhone(memberForm.getPhone());
         }
         if (memberForm.getEmail() != null) {
             loginUser.setEmail(memberForm.getEmail());
@@ -304,7 +320,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    // LoginUser를 MemberInfo로 변환
+    // LoginUser를 MemberDto로 변환
     private MemberDto loginUserConvertToMemberInfo(LoginUserDto loginUser) {
         return MemberDto.builder()
                 .id(loginUser.getId())
@@ -316,7 +332,7 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // Member를 MemberInfo로 변환
+    // Member를 MemberDto로 변환
     private MemberDto memberConvertToMemberInfo(Member member) {
         return MemberDto.builder()
                 .id(member.getId())
@@ -328,14 +344,16 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // LoginUser를 DetailMemberInfo로 변환
+    // LoginUser를 DetailMemberDto로 변환
     private DetailMemberDto loginUserConvertToDetailMemberInfo(LoginUserDto loginUser) {
         return DetailMemberDto.builder()
                 .id(loginUser.getId())
                 .name(loginUser.getName())
                 .nickname(loginUser.getNickname())
+                .job(loginUser.getJob())
                 .phone(loginUser.getPhone())
                 .email(loginUser.getEmail())
+                .motivationType(loginUser.getMotivationType())
                 .gender(loginUser.getGender())
                 .birthday(loginUser.getBirthday())
                 .profileImageUrl(loginUser.getProfileImageUrl())
@@ -388,14 +406,16 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    // Member를 DetailMemberInfo로 변환
+    // Member를 DetailMemberDto로 변환
     private DetailMemberDto memberConvertToDetailMemberInfo(Member member) {
         return DetailMemberDto.builder()
                 .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
+                .job(member.getJob())
                 .phone(member.getPhone())
                 .email(member.getEmail())
+                .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .birthday(member.getBirthday())
                 .profileImageUrl(member.getProfileImageUrl())

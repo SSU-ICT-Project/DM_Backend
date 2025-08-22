@@ -1,17 +1,20 @@
 package com.dm.DM_Backend.domain.account.member.service;
 
 import com.dm.DM_Backend.domain.account.auth.loginUser.LoginUserDto;
+import com.dm.DM_Backend.domain.account.member.dto.req.AdminForm;
 import com.dm.DM_Backend.domain.account.member.dto.req.MemberForm;
 import com.dm.DM_Backend.domain.account.member.dto.res.DetailMemberDto;
 import com.dm.DM_Backend.domain.account.member.dto.res.MemberDto;
-import com.dm.DM_Backend.domain.account.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
+    // 회원가입 [가데이터/초기관리자 생성]
+    void adminSignup(AdminForm adminForm);
+
     // 회원가입
-    Member signup(MemberForm memberForm);
+    void signup(MemberForm memberForm);
 
     // 본인 회원정보 조회
     MemberDto getMyInfo(LoginUserDto loginUser);
