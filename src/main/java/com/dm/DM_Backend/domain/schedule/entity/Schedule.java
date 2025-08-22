@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class Schedule extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_Id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Column(length = 20)
