@@ -65,6 +65,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     
                 요구사항:
                 - {{motivation_type}} 에 맞게 70자 내외 한국어 메시지를 작성하세요.
+                - {{motivation_type}}에 해당하는 내용을 {{context}}에서 찾으세요.
                 - 디지털 과사용 (숏폼 중독, 습관적 sns 사용)으로 인해 일상에 지장이 생기는 사람들을 위해
                   사용자의 성향과 정보(나이, 성별, 직업)에 맞춘 동기부여 메시지를 제공하세요.
                 - 긍정적이고 행동을 유도하는 톤을 유지하세요.
@@ -101,36 +102,35 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         return screenTimeConvertToScreenTimeReviewResponse(screenTime);
     }
 
+    // MotivationType 변경, Member.java파일에서도 변경
     private String mapMotivationType(Member.MotivationType type) {
         return switch (type) {
-            case EMOTIONAL -> "감성 자극형";
-            case VISION -> "미래/비전 제시형";
-            case ACTION -> "구체적 행동 제시형";
-            case COMPETITION -> "비교/경쟁 자극형";
+            case ACHIEVER -> "성취형";
+            case MINDFUL -> "감정형";
+            case CHALLENGER -> "도전형";
         };
     }
 
+    // MotivationType 변경, Member.java파일에서도 변경
     private String mapMotivationPrompt(Member.MotivationType type) {
         return switch (type) {
-            case EMOTIONAL -> """
-            감성 자극형:
-            - 따뜻한 공감과 위로를 중심으로 메시지를 작성하세요.
-            - 사용자의 감정을 이해하고 격려하는 톤을 사용하세요.
+            case ACHIEVER -> """
+            성취형:
+            - 사용자는 불안, 스트레스에서 벗어나기 위해 목표를 세우는 유형(감정형)입니다.
+            - 사용자의 목표는 감정적 회복의 도구가 되지만, 스트레스가 커지면 쉽게 포기할 위험도 있습니다.
+            - 사용자가 꾸준히 노력할 수 있도록, 사용자의 목표를 기반으로 동기부여해야합니다.
             """;
-            case VISION -> """
-            미래/비전 제시형:
-            - 장기적인 목표와 긍정적인 미래를 강조하세요.
-            - 사용자가 지금의 행동이 미래의 성취로 이어진다는 점을 부각하세요.
+            case MINDFUL -> """
+            감성형:
+            - 사용자는 새로운 자극과 도전에서 힘을 얻는 유형(도전형)입니다.
+            - 사용자는 즉각적인 성취와 변화에 강하게 동기부여 되지만, 장기적인 계획에는 쉽게 흔들릴 수 있습니다.
+            - 사용자가 안정적으로 목표를 이어갈 수 있도록 사용자의 목표를 기반으로 동기부여해야합니다.
             """;
-            case ACTION -> """
-            구체적 행동 제시형:
-            - 지금 바로 실천 가능한 구체적인 행동을 제안하세요.
-            - 사용자가 즉시 따라할 수 있도록 명확한 지시를 포함하세요.
-            """;
-            case COMPETITION -> """
-            비교/경쟁 자극형:
-            - 다른 사람과의 비교나 경쟁심을 유발하는 메시지를 작성하세요.
-            - 더 나은 성과를 향해 도전하도록 동기를 부여하세요.
+            case CHALLENGER -> """
+            도전형:
+            - 사용자는 새로운 자극과 도전에서 힘을 얻는 유형(도전형)입니다.
+            - 즉각적인 성취와 변화에 강하게 동기부여 되지만, 장기적인 계획에는 쉽게 흔들릴 수 있습니다.
+            - 사용자가 장기 목표도 놓치지 않도록 짧고  사용자의 목표를 기반으로 동기부여해야합니다.
             """;
         };
     }
