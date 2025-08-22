@@ -25,8 +25,8 @@ public class ApiV1ScreenTimeController {
     // 스크린타임리뷰 메시지 생성
     @PostMapping("/reviewMessage")
     @Operation(summary = "스크린타임리뷰 메시지 생성")
-    public ApiResponse<ScreenTimeReviewResponse> getScreenTimeReview(@RequestBody @Valid ScreenTimeReviewRequest request,
+    public ApiResponse<ScreenTimeReviewResponse> getScreenTimeReview(@RequestBody @Valid ScreenTimeReviewRequest screenTimeReviewRequest,
                                                                      @LoginUser LoginUserDto loginUser) {
-        return ApiResponse.of(screenTimeService.getScreenTimeReview(request,loginUser));
+        return ApiResponse.of(screenTimeService.getScreenTimeReview(screenTimeReviewRequest,loginUser));
     }
 }

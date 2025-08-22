@@ -1,6 +1,7 @@
 package com.dm.DM_Backend.global.initData;
 
 import com.dm.DM_Backend.domain.account.auth.loginUser.LoginUserDto;
+import com.dm.DM_Backend.domain.account.member.dto.req.AdminForm;
 import com.dm.DM_Backend.domain.account.member.dto.req.MemberForm;
 import com.dm.DM_Backend.domain.account.member.entity.Member;
 import com.dm.DM_Backend.domain.account.member.repository.MemberRepository;
@@ -58,19 +59,19 @@ public class NotProdService {
             members.add(member);
         }
 
-        //이메일인증 테스트용 유저6
-        MemberForm memberForm = MemberForm.builder()
-                .nickname("test6")
-                .email("uichan0610@gmail.com")
+        // 관리자 생성
+        AdminForm adminForm = AdminForm.builder()
+                .nickname("admin6")
+                .email("admin6@gmail.com")
                 .job(jobs.get(0))
-                .password("1234")
+                .password("admin6")
                 .motivationType(Member.MotivationType.VISION)
                 .gender(Member.Gender.MALE)
+                .memberRole(Member.MemberRole.ROLE_ADMIN)
                 .birthday(LocalDate.of(2001,01,01))
                 .build();
-        memberService.signup(memberForm);
-
-        Member member = memberRepository.findByEmail(memberForm.getEmail())
+        memberService.adminSignup(adminForm);
+        Member member = memberRepository.findByEmail(adminForm.getEmail())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         members.add(member);
 

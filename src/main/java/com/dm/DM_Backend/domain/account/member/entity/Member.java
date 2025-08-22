@@ -62,7 +62,7 @@ public class Member extends BaseEntity {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 9, nullable = false)
+    @Column(length = 10, nullable = false)
     @Builder.Default
     private MemberRole role = MemberRole.ROLE_USER;  // 권한 (관리자, 사용자)
     public enum MemberRole {
