@@ -133,7 +133,13 @@ public enum ReturnCode {
 
     // 포스트 엘라스틱 서치 에러 (
     DATA_CONVERSION_ERROR(500, "SEARCH_001", "데이터 변환 중 오류가 발생했습니다"),
-    SEARCH_POST_ERROR(500, "SEARCH_002", "엘라스틱 서치 검색 중 에러 발생");
+    SEARCH_POST_ERROR(500, "SEARCH_002", "엘라스틱 서치 검색 중 에러 발생"),
+
+    // Schedule 관련 에러 (추가 오류 코드)
+    SCHEDULE_NOT_FOUND(404, "SCHEDULE_001", "해당 일정을 찾을 수 없습니다."),
+    UNAUTHORIZED_SCHEDULE_ACCESS(403, "SCHEDULE_002", "해당 일정에 접근할 권한이 없습니다.");
+
+
 
     private final int status;
     private final String code;

@@ -72,7 +72,6 @@ dependencies {
     implementation("dev.langchain4j:langchain4j")
     implementation("dev.langchain4j:langchain4j-core")
     implementation("dev.langchain4j:langchain4j-open-ai")
-    implementation("dev.langchain4j:langchain4j-rag")
     implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox")
     // 3) HTTP 클라이언트 구현 ⇒ Spring RestClient만 남김
     implementation("dev.langchain4j:langchain4j-http-client-spring-restclient")

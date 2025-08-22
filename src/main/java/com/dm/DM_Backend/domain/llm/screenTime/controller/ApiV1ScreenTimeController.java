@@ -22,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiV1ScreenTimeController {
     private final ScreenTimeService screenTimeService;
 
-    // 스크린타임리뷰 생성
+    // 스크린타임리뷰 메시지 생성
     @PostMapping("/reviewMessage")
-    @Operation(summary = "ScreenTimeReviewMessage")
-    public ApiResponse<ScreenTimeReviewResponse> getScreenTimeReview(@RequestBody @Valid ScreenTimeReviewRequest request,
+    @Operation(summary = "스크린타임리뷰 메시지 생성")
+    public ApiResponse<ScreenTimeReviewResponse> getScreenTimeReview(@RequestBody @Valid ScreenTimeReviewRequest screenTimeReviewRequest,
                                                                      @LoginUser LoginUserDto loginUser) {
-        return ApiResponse.of(screenTimeService.getScreenTimeReview(request,loginUser));
+        return ApiResponse.of(screenTimeService.getScreenTimeReview(screenTimeReviewRequest,loginUser));
     }
 }

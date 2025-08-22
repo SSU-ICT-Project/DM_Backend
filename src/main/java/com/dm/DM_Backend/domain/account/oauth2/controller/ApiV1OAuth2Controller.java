@@ -4,7 +4,6 @@ import com.dm.DM_Backend.domain.account.auth.dto.req.LoginForm;
 import com.dm.DM_Backend.domain.account.auth.dto.res.Auth;
 import com.dm.DM_Backend.domain.account.auth.service.AuthService;
 import com.dm.DM_Backend.domain.account.member.dto.req.MemberForm;
-import com.dm.DM_Backend.domain.account.member.entity.Member;
 import com.dm.DM_Backend.domain.account.member.repository.MemberRepository;
 import com.dm.DM_Backend.domain.account.member.service.MemberService;
 import com.dm.DM_Backend.domain.account.oauth2.service.OAuth2Service;
@@ -68,8 +67,8 @@ public class ApiV1OAuth2Controller {
                     .gender(null)
                     .birthday(null)
                     .build();
-            Member newMember = memberService.signup(memberForm);
-            socialLoginForm = LoginForm.builder().email(newMember.getEmail()).build();
+            memberService.signup(memberForm);
+            socialLoginForm = LoginForm.builder().email(memberForm.getEmail()).build();
         }
         Auth auth = authService.login(socialLoginForm, true);
         String accessToken = auth.getAccessToken();
