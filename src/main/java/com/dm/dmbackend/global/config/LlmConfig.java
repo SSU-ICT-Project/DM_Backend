@@ -1,8 +1,14 @@
 package com.dm.dmbackend.global.config;
 
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCoach;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeReview;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.rag.DefaultRetrievalAugmentor;
+import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,9 +16,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LlmConfig {
-    @Value("${spring.rag.ingest}")
-    private boolean ingestEnabled;
-
     @Value("${langchain4j.open-ai.chat-model.api-key}")
     private String openAiApiKey;
 
@@ -71,8 +74,36 @@ public class LlmConfig {
         return EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(pgVectorStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(3)
-                .minScore(0.7)
+                .maxResults(3)      // 필요에 맞게 조정
+                .minScore(0.6)      // 필요에 맞게 조정
+                .build();
+    }
+
+    // 자동 RAG: {{information}} 채워 넣는 augmentor
+    @Bean
+    public RetrievalAugmentor screenTimeAugmentor(EmbeddingStoreContentRetriever retriever) {
+        return DefaultRetrievalAugmentor.builder()
+                .contentRetriever(retriever)
+                .build();
+    }
+
+    // 자동 RAG 연결됨
+    @Bean
+    public ScreenTimeCoach screenTimeCoach(ChatModel chatModel,
+                                           RetrievalAugmentor screenTimeAugmentor) {
+        return AiServices.builder(ScreenTimeCoach.class)
+                .chatModel(chatModel)
+                .retrievalAugmentor(screenTimeAugmentor)
+                .build();
+    }
+
+    // 자동 RAG 연결됨
+    @Bean
+    public ScreenTimeReview screenTimeReview(ChatModel chatModel,
+                                             RetrievalAugmentor screenTimeAugmentor) {
+        return AiServices.builder(ScreenTimeReview.class)
+                .chatModel(chatModel)
+                .retrievalAugmentor(screenTimeAugmentor)
                 .build();
     }
 }

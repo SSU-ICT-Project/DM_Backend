@@ -32,7 +32,7 @@ public class ApiV1MainGoalController {
         return ApiResponse.of(ReturnCode.SUCCESS);
     }
 
-    // 목표 리스트 조회
+    // 목표 전체 리스트 조회
     @GetMapping
     @Operation(summary = "목표 리스트 조회")
     public ApiResponse<MainGoalWithSubGoalsResponse> getAllGoal(@ModelAttribute MainGoalPage mainGoalPage, @LoginUser LoginUserDto loginUser){

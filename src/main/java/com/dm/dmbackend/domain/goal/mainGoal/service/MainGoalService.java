@@ -10,8 +10,11 @@ public interface MainGoalService {
     // 목표 생성
     void addMainGoal(MainGoalRequest mainGoalRequest, LoginUserDto loginUser);
 
-    // 목표 리스트 조회
+    // 목표 전체 리스트 조회
     Page<MainGoalWithSubGoalsResponse> getAllGoal(Pageable pageable, LoginUserDto loginUser);
+
+    // 상위목표 조회(RAG용)
+    String buildCompactGoalSummary(LoginUserDto loginUser, int limit);
 
     // 목표 수정
     void updateMainGoal(Long mainGoalId, MainGoalRequest mainGoalRequest, LoginUserDto loginUser);

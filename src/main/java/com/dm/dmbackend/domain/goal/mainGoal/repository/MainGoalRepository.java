@@ -19,4 +19,15 @@ public interface MainGoalRepository extends JpaRepository<MainGoal, Long> {
     """)
     Page<MainGoal> findByMemberIdWithOrder(@Param("memberId") Long memberId, Pageable pageable);
 
+    // 멤버가 작성한 미완료 목표
+    @Query("""
+    select mg from MainGoal mg
+    where mg.member.id = :memberId
+      and (mg.checked = false or mg.checked is null)
+    order by 
+      case when mg.deadline is null then 1 else 0 end,
+      mg.deadline asc,
+      mg.createdAt asc
+    """)
+    Page<MainGoal> findForRag(@Param("memberId") Long memberId, Pageable pageable);
 }
