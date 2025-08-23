@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/rest-api/v1/ingest")
 @RequiredArgsConstructor
-@Tag(name = "Thesis", description = "논문 임베딩 API")
+@Tag(name = "Ingest", description = "논문 임베딩 API")
 public class IngestController {
     private final IngestService ingestService;
 
