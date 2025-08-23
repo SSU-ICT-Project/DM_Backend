@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ScreenTimeReviewResponse {
+public class ScreenTimeMessageResponse {
     private Long id;
-    private String review;
+    private String message;
 }

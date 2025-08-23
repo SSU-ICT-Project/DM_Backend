@@ -48,7 +48,7 @@ public class MainGoalServiceImpl implements MainGoalService {
         mainGoalRepository.save(mainGoal);
     }
 
-    // 목표 리스트 조회
+    // 목표 전체 리스트 조회
     @Override
     @Transactional(readOnly = true)
     public Page<MainGoalWithSubGoalsResponse> getAllGoal(Pageable pageable, LoginUserDto loginUser) {
@@ -87,6 +87,30 @@ public class MainGoalServiceImpl implements MainGoalService {
         }
         // 6) Page로 감싸서 반환
         return new PageImpl<>(content, mainPage.getPageable(), mainPage.getTotalElements());
+    }
+
+    // 상위목표 조회(RAG용)
+    @Override
+    @Transactional(readOnly = true)
+    public String buildCompactGoalSummary(LoginUserDto loginUser, int limit){
+        Page<MainGoal> mainPage = mainGoalRepository.findForRag(
+                loginUser.getId(), PageRequest.of(0, limit));
+
+        List<MainGoal> mains = mainPage.getContent();
+        if (mains.isEmpty()) return "";
+
+        List<Long> mainIds = mains.stream().map(MainGoal::getId).toList();
+        StringBuilder sb = new StringBuilder(512);
+        int i = 1;
+        for (MainGoal mg : mains) {
+            String mainLine = "%d) [%s] %s".formatted(
+                    i++,
+                    calculateDDay(mg.getDeadline()),
+                    safe(mg.getContent())
+            );
+            sb.append(mainLine).append('\n');
+        }
+        return sb.toString().trim();
     }
 
     // 목표 수정
@@ -171,5 +195,9 @@ public class MainGoalServiceImpl implements MainGoalService {
         } else {
             return "D+" + Math.abs(daysBetween); // 마감일이 지남
         }
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s.replaceAll("\\s+", " ").trim();
     }
 }
