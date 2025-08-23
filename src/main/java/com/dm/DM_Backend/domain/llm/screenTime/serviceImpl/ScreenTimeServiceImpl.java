@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ScreenTimeServiceImpl implements ScreenTimeService {
-    private final ScreenTimeRepository screenTimeRepository;
-    private final ChatModel chatModel;
-    private final EmbeddingStoreContentRetriever retriever;
+    private final ScreenTimeRepository screenTimeRepository; // db와 통신
+    private final ChatModel chatModel; // LLM 대화
+    private final EmbeddingStoreContentRetriever retriever; //리트리버 RAG의 핵심
 
     // 스크린타임리뷰 생성
     @Override
     @Transactional
-    public ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest, LoginUserDto loginUser) {
+    public ScreenTimeReviewResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest, LoginUserDto loginUser) { //핵심 기능, 보낼 정보 준비
         String screenTimeData = screenTimeReviewRequest.getScreenTimeData();
         String motivationType = mapMotivationType(loginUser.getMotivationType());
 //        String goalData = loginUser.getGoalData();   // 목표 데이터 필요
@@ -44,7 +44,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         String userData = String.format("나이: %d, 성별: %s, 직업: %s",
                 age, loginUser.getGender(), loginUser.getJob());
 
-        PromptTemplate template = PromptTemplate.from(
+        PromptTemplate template = PromptTemplate.from( // 프롬프트 템플릿
                 """
                 당신은 사용자의 스크린타임 코치입니다.
     
@@ -74,31 +74,35 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
 
         // Retriever로 논문 검색
         List<Content> contents = retriever.retrieve(Query.from(screenTimeData));
+
+        // 검색된 자료들 하나의 텍스트로 합치기
         String context = contents.stream()
                 .map(c -> (c instanceof TextSegment ts) ? ts.text() : c.toString())
                 .collect(Collectors.joining("\n"));
 
+        // 동기부여 타입에 대한 상세 설명 준비
         String motivationPrompt = mapMotivationPrompt(loginUser.getMotivationType());
 
+        // 프롬프트 완성하고 질문하기
         String prompt = template.apply(Map.of(
                 "motivation_type", motivationPrompt,
                 "screen_time_data", screenTimeData,
                 "goal_data", "",      // 목표 데이터 필요
-                    "user_data", userData,
+                "user_data", userData,
                 "context", context
         )).text();
 
         // ChatModel 실행
         String reviewMessage = chatModel.chat(prompt);
 
-        // DB 저장
+        // LLM답변을 DB에 저장
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
                 .screenTimeData(screenTimeData)
                 .review(reviewMessage)
                 .build();
         screenTimeRepository.save(screenTime);
-
+        // 최종 결과를 앱에 가공해서 반환
         return screenTimeConvertToScreenTimeReviewResponse(screenTime);
     }
 
@@ -137,7 +141,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         };
     }
 
-    // ScreenTime을 ScreenTimeReviewResponse로 변환
+    // ScreenTime을 ScreenTimeReviewResponse로 변환, DB객체를 앱 응답 객체로 변환
     private ScreenTimeReviewResponse screenTimeConvertToScreenTimeReviewResponse(ScreenTime screenTime) {
         return ScreenTimeReviewResponse.builder()
                 .id(screenTime.getId())
@@ -145,3 +149,4 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .build();
     }
 }
+

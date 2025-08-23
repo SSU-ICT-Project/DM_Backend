@@ -82,6 +82,8 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.3.0-beta9")
     // 5) pgvector 추가
     implementation("dev.langchain4j:langchain4j-pgvector:1.3.0-beta9")
+    // 랭체인 웹 검색
+    implementation("dev.langchain4j:langchain4j-tavily:1.3.0")
 }
 
 tasks.withType<Test> {
