@@ -3,12 +3,16 @@ package com.dm.dmbackend.domain.account.auth.loginUser;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollow;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollowReq;
+import com.dm.dmbackend.domain.account.member.entity.TimeRange;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -22,6 +26,10 @@ public class LoginUserDto {
     private String password;
     private Member.MotivationType motivationType;
     private Member.Gender gender;
+    private LocalDate birthday;
+    private LocalTime averagePreparationTime;
+    private Map<DayOfWeek, List<TimeRange>> devTimePerDay;
+    private List<String> distractionAppList;
     private Member.State state;
     private Member.MemberRole role;
     private String profileImageUrl;
@@ -29,7 +37,6 @@ public class LoginUserDto {
     private List<MemberFollow> followedList;
     private List<MemberFollowReq> followReqList;
     private List<MemberFollowReq> followRecList;
-    private LocalDate birthday;
     private LocalDateTime createdAt;
 
     // Member 객체를 LoginUserDto로 변환하는 정적 팩토리 메서드
@@ -42,6 +49,10 @@ public class LoginUserDto {
                 .phone(member.getPhone())
                 .email(member.getEmail())
                 .password(member.getPassword())
+                .birthday(member.getBirthday())
+                .averagePreparationTime(member.getAveragePreparationTime())
+                .devTimePerDay(member.getDevTimePerDay())
+                .distractionAppList(member.getDistractionAppList())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .state(member.getState())
@@ -51,7 +62,6 @@ public class LoginUserDto {
                 .followedList(member.getFollowedList())
                 .followReqList(member.getFollowReqList())
                 .followRecList(member.getFollowRecList())
-                .birthday(member.getBirthday())
                 .createdAt(member.getCreatedAt())
                 .build();
     }
@@ -66,6 +76,10 @@ public class LoginUserDto {
                 .phone(this.phone)
                 .email(this.email)
                 .password(this.password)
+                .birthday(this.birthday)
+                .averagePreparationTime(this.averagePreparationTime)
+                .devTimePerDay(this.devTimePerDay)
+                .distractionAppList(this.distractionAppList)
                 .motivationType(this.motivationType)
                 .gender(this.gender)
                 .state(this.state)
@@ -75,7 +89,6 @@ public class LoginUserDto {
                 .followedList(this.followedList)
                 .followReqList(this.followReqList)
                 .followRecList(this.followRecList)
-                .birthday(this.birthday)
                 .createdAt(this.createdAt)
                 .build();
     }

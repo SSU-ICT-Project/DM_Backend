@@ -1,14 +1,19 @@
 package com.dm.dmbackend.domain.account.member.entity;
 
 import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.Type;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Setter
@@ -35,6 +40,18 @@ public class Member extends BaseEntity {
 
     @Column(length = 1000)
     private String password;
+
+    private LocalDate birthday;
+
+    private LocalTime averagePreparationTime;
+
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonType.class)
+    private Map<DayOfWeek, List<TimeRange>> devTimePerDay;
+
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonType.class)
+    private List<String> distractionAppList;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 11)
@@ -83,6 +100,4 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "followRec", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberFollowReq> followRecList = new ArrayList<>();
-
-    private LocalDate birthday;
 }

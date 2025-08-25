@@ -28,10 +28,12 @@ public class NotificationEventListener {
     private final FcmService fcmService;
     private final FcmTokenService fcmTokenService;
     private final Map<String, NotificationMeta> notificationMetaMap = Map.of(
-            "follow-topic", new NotificationMeta("팔로우 알림", "follow-topic-dlt")
+            "follow-topic", new NotificationMeta("팔로우 알림", "follow-topic-dlt"),
+            "motivate-topic", new NotificationMeta("동기부여 메시지 알림", "motivate-topic-dlt"),
+            "cure-topic", new NotificationMeta("중독 치료 메시지 알림", "cure-topic-dlt")
     );
 
-    @KafkaListener(topics = {"follow-topic"}, groupId = "1")
+    @KafkaListener(topics = {"follow-topic", "motivate-topic", "cure-topic"}, groupId = "1")
     public void consume(ConsumerRecord<String, String> record) {
         String topic = record.topic();
         String message = record.value();

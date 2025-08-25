@@ -1,110 +1,29 @@
-package com.dm.dmbackend.global.initData;
+package com.dm.dmbackend.global.initData.service;
 
-import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.dto.req.AdminForm;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
 import com.dm.dmbackend.domain.account.member.entity.Member;
-import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
-import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.domain.goal.mainGoal.entity.MainGoal;
 import com.dm.dmbackend.domain.goal.mainGoal.repository.MainGoalRepository;
 import com.dm.dmbackend.domain.goal.subGoal.entity.SubGoal;
 import com.dm.dmbackend.domain.goal.subGoal.repository.SubGoalRepository;
-import com.dm.dmbackend.global.exception.ReturnCode;
-import com.dm.dmbackend.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto.ConvertToLoginUserDto;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NotProdService {
-    private final MemberService memberService;
-    private final MemberRepository memberRepository;
+public class NotProdGoalService {
     private final MainGoalRepository mainGoalRepository;
     private final SubGoalRepository subGoalRepository;
 
+    // 상위목표/하위목표 더미 데이터 생성 (유저 5명만 대상)
     @Transactional
-    public void initDummyData() {
-        // 유저 1~5 + 관리자 1명 생성
-        List<Member> members = createMembers();
-
-        // 5명 모두 서로 팔로우하게 만들기
-        createFollowRelations(members);
-
-        // 목표/하위목표 더미 데이터 생성 (유저 1~5만 대상)
-        createGoals(members);
-    }
-
-    // 유저 1, 2, 3, 4, 5 생성
-    private List<Member> createMembers() {
-        List<String> names = List.of("서울", "인천", "강릉", "부산", "제주");
-        List<String> jobs = List.of("개발자", "의사", "파일럿", "변호사", "모델");
-        List<String> nicknames = List.of("seoul_gangnam", "incheon_songdo", "gangneung_beach", "busan_haeundae", "jeju_seaside");
-        Member.MotivationType[] motivationTypes = Member.MotivationType.values();
-        List<Member> members = new ArrayList<>();
-        for (int i = 0; i < names.size(); i++) {
-            MemberForm memberForm = MemberForm.builder()
-                    .nickname(nicknames.get(i))
-                    .job(jobs.get(i))
-                    .email("user" + (i + 1) + "@example.com")
-                    .password("1234")
-                    .motivationType(motivationTypes[i % motivationTypes.length])
-                    .gender(i % 2 == 0 ? Member.Gender.MALE : Member.Gender.FEMALE)
-                    .birthday(LocalDate.of(2001, i + 1, 1))
-                    .build();
-            memberService.signup(memberForm);
-
-            Member member = memberRepository.findByEmail(memberForm.getEmail())
-                    .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
-            members.add(member);
-        }
-
-        // 관리자 생성
-        AdminForm adminForm = AdminForm.builder()
-                .nickname("admin6")
-                .email("admin6@gmail.com")
-                .job(jobs.get(0))
-                .password("admin6")
-                .motivationType(Member.MotivationType.VISION)
-                .gender(Member.Gender.MALE)
-                .memberRole(Member.MemberRole.ROLE_ADMIN)
-                .birthday(LocalDate.of(2001,01,01))
-                .build();
-        memberService.adminSignup(adminForm);
-        Member member = memberRepository.findByEmail(adminForm.getEmail())
-                .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
-        members.add(member);
-
-        return members;
-    }
-
-    // 5명 모두 서로 팔로우하게 만들기
-    private void createFollowRelations(List<Member> members) {
-        for (int i = 0; i < members.size(); i++) {
-            Member fromMember = members.get(i);
-            LoginUserDto fromLoginUser = ConvertToLoginUserDto(fromMember);
-            for (int j = 0; j < members.size(); j++) {
-                if (i == j) continue;
-                Member toMember = members.get(j);
-                memberService.followReq(toMember.getId(), fromLoginUser);
-                LoginUserDto toLoginUser = ConvertToLoginUserDto(toMember);
-                memberService.acceptFollowReq(fromMember.getId(), toLoginUser);
-            }
-        }
-    }
-
-    // 목표/하위목표 더미 데이터 생성 (유저 1~5만 대상)
-    private void createGoals(List<Member> members) {
-        // members = [유저1, 유저2, 유저3, 유저4, 유저5, 관리자]
+    public void createGoals(List<Member> members) {
+        // members = [유저1, 유저2, 유저3, 유저4, 유저5, (관리자)]
         if (members.size() < 5) return;
         Member u1 = members.get(0);
         Member u2 = members.get(1);
@@ -191,7 +110,7 @@ public class NotProdService {
         MainGoal mg = MainGoal.builder()
                 .member(owner)
                 .content(content)
-                .deadline(deadline)   // LocalDate
+                .deadline(deadline) // Entity가 LocalDateTime이면: .deadline(deadline.atStartOfDay())
                 .checked(checked)
                 .build();
         return mainGoalRepository.save(mg);
@@ -202,7 +121,7 @@ public class NotProdService {
                 .member(owner)
                 .mainGoal(main)
                 .content(content)
-                .deadline(deadline)   // null 허용
+                .deadline(deadline) // Entity가 LocalDateTime이면: deadline != null ? deadline.atStartOfDay() : null
                 .checked(checked)
                 .build();
         subGoalRepository.save(sg);

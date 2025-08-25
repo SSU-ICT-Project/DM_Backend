@@ -1,14 +1,13 @@
 package com.dm.dmbackend.domain.llm.screenTime.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCoachRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeReviewRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.res.ScreenTimeMessageResponse;
+import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
+import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
 
 public interface ScreenTimeService {
-    // 스크린타임 리뷰 메시지 생성
-    ScreenTimeMessageResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest, LoginUserDto loginUser);
+    // 중독 치료 메시지 생성
+    void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest, LoginUserDto loginUser);
 
-    // 스크린타임 코칭 메시지 생성
-    ScreenTimeMessageResponse getScreenTimeCoach(ScreenTimeCoachRequest screenTimeCoachRequest, LoginUserDto loginUser);
+    // 동기부여 메시지 생성
+    void getScreenTimeMotivate(ScreenTimeMotivateRequest screenTimeMotivateRequest, LoginUserDto loginUser);
 }

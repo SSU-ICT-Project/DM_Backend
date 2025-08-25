@@ -4,16 +4,21 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.goal.mainGoal.service.MainGoalService;
 import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContext;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCoachRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeReviewRequest;
+import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
+import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
 import com.dm.dmbackend.domain.llm.screenTime.dto.res.ScreenTimeMessageResponse;
 import com.dm.dmbackend.domain.llm.screenTime.entity.ScreenTime;
 import com.dm.dmbackend.domain.llm.screenTime.repository.ScreenTimeRepository;
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCoach;
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeReview;
+import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
+import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +31,22 @@ import java.time.Period;
 public class ScreenTimeServiceImpl implements ScreenTimeService {
     private final ScreenTimeRepository screenTimeRepository;
     private final MainGoalService mainGoalService;
-    private final ScreenTimeCoach coach;
-    private final ScreenTimeReview review;
+    private final ScreenTimeCure cure;
+    private final ScreenTimeMotivate motivate;
+    private final GoalDetail goalDetail;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
-    // 스크린타임 리뷰 메시지 생성
+    // 중독 치료 메시지 생성
     @Override
     @Transactional
-    public ScreenTimeMessageResponse getScreenTimeReview(ScreenTimeReviewRequest screenTimeReviewRequest,
+    public void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest,
                                                          LoginUserDto loginUser) {
-        String screenTimeData = screenTimeReviewRequest.getScreenTimeData();
+        String screenTimeData = screenTimeCureRequest.getScreenTimeData();
         UserContext ctx = buildUserContext(loginUser);
 
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
-        String reviewMessage = review.message(
+        String cureMessage = cure.message(
                 ctx.getMotivationPrompt(),
                 nvl(screenTimeData),
                 nvl(ctx.getGoalSummary()),
@@ -48,37 +56,79 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
                 .screenTimeData(screenTimeData)
-                .message(reviewMessage)
-                .messageType(ScreenTime.MessageType.REVIEW)
+                .message(cureMessage)
+                .messageType(ScreenTime.MessageType.CURE)
                 .build();
         screenTimeRepository.save(screenTime);
-        return screenTimeConvertToScreenTimeMessageResponse(screenTime);
+        // 중독 치료 메시지 이벤트 생성
+        Notification notification = Notification.builder()
+                .senderId(loginUser.getId())
+                .senderNickname(loginUser.getNickname())
+                .senderProfileUrl(loginUser.getProfileImageUrl())
+                .receiverId(loginUser.getId())
+                .objectId(screenTime.getId())
+                .content(cureMessage)
+                .targetObject(Notification.TargetObject.Cure)
+                .build();
+        try {
+            String message = objectMapper.writeValueAsString(notification);
+            kafkaTemplate.send("cure-topic", message);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize Notification: {}", e.getMessage());
+        }
     }
 
-    // 스크린타임 코칭 메시지 생성
+    // 동기부여 메시지 생성
     @Override
     @Transactional
-    public ScreenTimeMessageResponse getScreenTimeCoach(ScreenTimeCoachRequest screenTimeCoachRequest,
-                                                        LoginUserDto loginUser){
-        String accessAppData = screenTimeCoachRequest.getAccessAppData();
+    public void getScreenTimeMotivate(ScreenTimeMotivateRequest screenTimeMotivateRequest,
+                                      LoginUserDto loginUser){
+        String accessAppData = screenTimeMotivateRequest.getAccessAppData();
         UserContext ctx = buildUserContext(loginUser);
-
-        // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
-        String coachMessage = coach.message(
+        // 목표 구체화 먼저 생성
+        String goalDetailMsg;
+        try {
+            goalDetailMsg = goalDetail.message(
+                    ctx.getMotivationPrompt(),
+                    nvl(ctx.getGoalSummary()),
+                    ctx.getUserData()
+            );
+        } catch (Exception e) {
+            log.warn("GoalDetail LLM failed: {}", e.toString());
+            goalDetailMsg = ""; // 안전한 폴백
+        }
+        // 동기부여 메시지 생성 (goal_detail 주입!)
+        String motivateMessage = motivate.message(
                 ctx.getMotivationPrompt(),
                 nvl(accessAppData),
                 nvl(ctx.getGoalSummary()),
+                nvl(goalDetailMsg),
                 ctx.getUserData()
         );
         // DB 저장
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
                 .accessAppData(accessAppData)
-                .message(coachMessage)
-                .messageType(ScreenTime.MessageType.COACH)
+                .message(motivateMessage)
+                .messageType(ScreenTime.MessageType.MOTIVATE)
                 .build();
         screenTimeRepository.save(screenTime);
-        return screenTimeConvertToScreenTimeMessageResponse(screenTime);
+        // 동기부여 메시지 이벤트 생성
+        Notification notification = Notification.builder()
+                .senderId(loginUser.getId())
+                .senderNickname(loginUser.getNickname())
+                .senderProfileUrl(loginUser.getProfileImageUrl())
+                .receiverId(loginUser.getId())
+                .objectId(screenTime.getId())
+                .content(motivateMessage)
+                .targetObject(Notification.TargetObject.Motivate)
+                .build();
+        try {
+            String message = objectMapper.writeValueAsString(notification);
+            kafkaTemplate.send("motivate-topic", message);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize Notification: {}", e.getMessage());
+        }
     }
 
     // ----------------- 헬퍼 메서드 -----------------

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScreenTimeReviewRequest {
+public class ScreenTimeCureRequest {
     private String screenTimeData;
 }

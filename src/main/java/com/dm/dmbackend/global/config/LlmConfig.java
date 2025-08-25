@@ -1,7 +1,8 @@
 package com.dm.dmbackend.global.config;
 
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCoach;
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeReview;
+import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
@@ -89,21 +90,27 @@ public class LlmConfig {
 
     // 자동 RAG 연결됨
     @Bean
-    public ScreenTimeCoach screenTimeCoach(ChatModel chatModel,
+    public ScreenTimeCure screenTimeCure(ChatModel chatModel,
                                            RetrievalAugmentor screenTimeAugmentor) {
-        return AiServices.builder(ScreenTimeCoach.class)
+        return AiServices.builder(ScreenTimeCure.class)
                 .chatModel(chatModel)
                 .retrievalAugmentor(screenTimeAugmentor)
                 .build();
     }
 
-    // 자동 RAG 연결됨
+    // RAG 사용X
     @Bean
-    public ScreenTimeReview screenTimeReview(ChatModel chatModel,
-                                             RetrievalAugmentor screenTimeAugmentor) {
-        return AiServices.builder(ScreenTimeReview.class)
+    public ScreenTimeMotivate screenTimeMotivate(ChatModel chatModel) {
+        return AiServices.builder(ScreenTimeMotivate.class)
                 .chatModel(chatModel)
-                .retrievalAugmentor(screenTimeAugmentor)
+                .build();
+    }
+
+    // RAG 사용X
+    @Bean
+    public GoalDetail goalDetail(ChatModel chatModel) {
+        return AiServices.builder(GoalDetail.class)
+                .chatModel(chatModel)
                 .build();
     }
 }
