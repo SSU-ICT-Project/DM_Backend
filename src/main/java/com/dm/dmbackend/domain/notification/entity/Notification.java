@@ -21,6 +21,8 @@ public class Notification extends BaseEntity {
     private Long receiverId;
     private Long objectId;
     private String title;
+    
+    @Column(length = 500)
     private String content;
 
     @Builder.Default
@@ -30,6 +32,6 @@ public class Notification extends BaseEntity {
     @Column(length = 10)
     private TargetObject targetObject;
     public enum TargetObject {
-        Comment, Follow, Post
+        Comment, Follow, Post, Motivate, Cure
     }
 }

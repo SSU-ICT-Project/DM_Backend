@@ -87,6 +87,9 @@ public class MemberServiceImpl implements MemberService {
                 .motivationType(memberForm.getMotivationType())
                 .gender(memberForm.getGender())
                 .birthday(memberForm.getBirthday())
+                .averagePreparationTime(memberForm.getAveragePreparationTime())
+                .devTimePerDay(memberForm.getDevTimePerDay())
+                .distractionAppList(memberForm.getDistractionAppList())
                 .build();
         memberRepository.save(member);
     }
@@ -146,21 +149,16 @@ public class MemberServiceImpl implements MemberService {
             }
             imageUrl = null;
         }
-        if (memberForm.getNickname() != null) {
-            loginUser.setNickname(memberForm.getNickname());
-        }
-        if (memberForm.getEmail() != null) {
-            loginUser.setEmail(memberForm.getEmail());
-        }
-        if (memberForm.getPassword() != null) {
-            loginUser.setPassword(BCrypt.hashpw(memberForm.getPassword(), BCrypt.gensalt()));
-        }
-        if (memberForm.getGender() != null) {
-            loginUser.setGender(memberForm.getGender());
-        }
-        if (memberForm.getBirthday() != null) {
-            loginUser.setBirthday(memberForm.getBirthday());
-        }
+        loginUser.setNickname(memberForm.getNickname());
+        loginUser.setJob(memberForm.getJob());
+        loginUser.setEmail(memberForm.getEmail());
+        loginUser.setPassword(BCrypt.hashpw(memberForm.getPassword(), BCrypt.gensalt()));
+        loginUser.setBirthday(memberForm.getBirthday());
+        loginUser.setAveragePreparationTime(memberForm.getAveragePreparationTime());
+        loginUser.setDevTimePerDay(memberForm.getDevTimePerDay());
+        loginUser.setDistractionAppList(memberForm.getDistractionAppList());
+        loginUser.setMotivationType(memberForm.getMotivationType());
+        loginUser.setGender(memberForm.getGender());
         loginUser.setProfileImageUrl(imageUrl);
         // LoginUserDto를 Member 엔티티로 변환
         Member memberEntity = loginUser.ConvertToMember();
@@ -355,9 +353,12 @@ public class MemberServiceImpl implements MemberService {
                 .job(loginUser.getJob())
                 .phone(loginUser.getPhone())
                 .email(loginUser.getEmail())
+                .birthday(loginUser.getBirthday())
+                .averagePreparationTime(loginUser.getAveragePreparationTime())
+                .devTimePerDay(loginUser.getDevTimePerDay())
+                .distractionAppList(loginUser.getDistractionAppList())
                 .motivationType(loginUser.getMotivationType())
                 .gender(loginUser.getGender())
-                .birthday(loginUser.getBirthday())
                 .profileImageUrl(loginUser.getProfileImageUrl())
                 .followMemberCount(loginUser.getFollowList().stream().count())
                 .followedMemberCount(loginUser.getFollowedList().stream().count())
@@ -417,9 +418,12 @@ public class MemberServiceImpl implements MemberService {
                 .job(member.getJob())
                 .phone(member.getPhone())
                 .email(member.getEmail())
+                .birthday(member.getBirthday())
+                .averagePreparationTime(member.getAveragePreparationTime())
+                .devTimePerDay(member.getDevTimePerDay())
+                .distractionAppList(member.getDistractionAppList())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())
-                .birthday(member.getBirthday())
                 .profileImageUrl(member.getProfileImageUrl())
                 .followMemberCount(member.getFollowList().stream().count())
                 .followedMemberCount(member.getFollowedList().stream().count())

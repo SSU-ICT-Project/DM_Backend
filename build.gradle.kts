@@ -65,6 +65,9 @@ dependencies {
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
+    // jsonb <-> Map, List
+    implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
     // LangChain4j
     // 1) BOM으로 버전 정렬
     implementation(platform("dev.langchain4j:langchain4j-bom:1.3.0"))

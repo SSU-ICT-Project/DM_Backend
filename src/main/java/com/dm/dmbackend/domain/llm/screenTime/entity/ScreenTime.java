@@ -28,14 +28,14 @@ public class ScreenTime extends BaseEntity {
     @Column(length = 20)
     private String accessAppData;
 
-    @Column(length = 100)
+    @Column(length = 500)
     private String message;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 6)
+    @Column(length = 8)
     private MessageType messageType;
     public enum MessageType {
-        REVIEW,
-        COACH
+        CURE,
+        MOTIVATE
     }
 }

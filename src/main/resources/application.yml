@@ -30,6 +30,8 @@ langchain4j:
     chat-model:
       api-key: ${GPT_API_KEY}
       model-name: gpt-4o-mini
+      log-requests: true
+      log-responses: true
 
 custom:
   jwt:

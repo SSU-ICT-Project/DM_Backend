@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("!prod")
 public class NotProd {
     @Bean
-    public ApplicationRunner applicationRunner(NotProdService notProdService) {
-        return args -> notProdService.initDummyData();
+    public ApplicationRunner applicationRunner(NotProdController notProdController) {
+        return args -> notProdController.initDummyData();
     }
 }

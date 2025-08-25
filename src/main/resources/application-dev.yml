@@ -78,3 +78,4 @@ logging:
     com.iEdu: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+    dev.langchain4j: DEBUG
