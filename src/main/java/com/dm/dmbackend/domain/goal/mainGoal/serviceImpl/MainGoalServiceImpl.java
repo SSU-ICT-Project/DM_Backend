@@ -120,9 +120,15 @@ public class MainGoalServiceImpl implements MainGoalService {
         MainGoal mainGoal = mainGoalRepository.findById(mainGoalId).orElseThrow(() -> new ServiceException(ReturnCode.MAIN_GOAL_NOT_FOUND));
         // 작성자 검증 아닌 경우 예외 처리
         validateMainGoalOwner(mainGoal, loginUser);
-        mainGoal.setContent(mainGoalRequest.getContent());
-        mainGoal.setDeadline(mainGoalRequest.getDeadline());
-        mainGoal.setChecked(mainGoalRequest.getChecked());
+        if (mainGoalRequest.getContent() != null) {
+            mainGoal.setContent(mainGoalRequest.getContent());
+        }
+        if (mainGoalRequest.getDeadline() != null) {
+            mainGoal.setDeadline(mainGoalRequest.getDeadline());
+        }
+        if (mainGoalRequest.getChecked() != null) {
+            mainGoal.setChecked(mainGoalRequest.getChecked());
+        }
         mainGoalRepository.save(mainGoal);
     }
 

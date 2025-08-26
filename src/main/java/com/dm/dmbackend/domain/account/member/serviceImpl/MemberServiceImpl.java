@@ -149,16 +149,36 @@ public class MemberServiceImpl implements MemberService {
             }
             imageUrl = null;
         }
-        loginUser.setNickname(memberForm.getNickname());
-        loginUser.setJob(memberForm.getJob());
-        loginUser.setEmail(memberForm.getEmail());
-        loginUser.setPassword(BCrypt.hashpw(memberForm.getPassword(), BCrypt.gensalt()));
-        loginUser.setBirthday(memberForm.getBirthday());
-        loginUser.setAveragePreparationTime(memberForm.getAveragePreparationTime());
-        loginUser.setDevTimePerDay(memberForm.getDevTimePerDay());
-        loginUser.setDistractionAppList(memberForm.getDistractionAppList());
-        loginUser.setMotivationType(memberForm.getMotivationType());
-        loginUser.setGender(memberForm.getGender());
+        if (memberForm.getNickname() != null) {
+            loginUser.setNickname(memberForm.getNickname());
+        }
+        if (memberForm.getJob() != null) {
+            loginUser.setJob(memberForm.getJob());
+        }
+        if (memberForm.getEmail() != null) {
+            loginUser.setEmail(memberForm.getEmail());
+        }
+        if (memberForm.getPassword() != null && !memberForm.getPassword().isEmpty()) {
+            loginUser.setPassword(BCrypt.hashpw(memberForm.getPassword(), BCrypt.gensalt()));
+        }
+        if (memberForm.getBirthday() != null) {
+            loginUser.setBirthday(memberForm.getBirthday());
+        }
+        if (memberForm.getAveragePreparationTime() != null) {
+            loginUser.setAveragePreparationTime(memberForm.getAveragePreparationTime());
+        }
+        if (memberForm.getDevTimePerDay() != null) {
+            loginUser.setDevTimePerDay(memberForm.getDevTimePerDay());
+        }
+        if (memberForm.getDistractionAppList() != null) {
+            loginUser.setDistractionAppList(memberForm.getDistractionAppList());
+        }
+        if (memberForm.getMotivationType() != null) {
+            loginUser.setMotivationType(memberForm.getMotivationType());
+        }
+        if (memberForm.getGender() != null) {
+            loginUser.setGender(memberForm.getGender());
+        }
         loginUser.setProfileImageUrl(imageUrl);
         // LoginUserDto를 Member 엔티티로 변환
         Member memberEntity = loginUser.ConvertToMember();

@@ -22,7 +22,7 @@ public class ScreenTime extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(length = 100)
+    @Column(name = "screen_time_data", columnDefinition = "text", nullable = false)
     private String screenTimeData;
 
     @Column(length = 20)
