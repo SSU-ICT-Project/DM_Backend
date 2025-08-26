@@ -44,7 +44,7 @@ custom:
 oauth2:
   providers:
     google:
-      clientId: YOUR_GOOGLE_SERVER_CLIENT_ID
+      clientId: 910298565199-1us9as4fejffov9q2e18kpco7l11lr13.apps.googleusercontent.com
     kakao:
       userInfoUri: https://kapi.kakao.com/v2/user/me
     naver:

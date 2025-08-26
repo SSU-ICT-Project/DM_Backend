@@ -3,16 +3,13 @@ package com.dm.dmbackend.domain.account.auth.loginUser;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollow;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollowReq;
-import com.dm.dmbackend.domain.account.member.entity.TimeRange;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -28,8 +25,8 @@ public class LoginUserDto {
     private Member.Gender gender;
     private LocalDate birthday;
     private LocalTime averagePreparationTime;
-    private Map<DayOfWeek, List<TimeRange>> devTimePerDay;
     private List<String> distractionAppList;
+    private Boolean useNotification;
     private Member.State state;
     private Member.MemberRole role;
     private String profileImageUrl;
@@ -51,8 +48,8 @@ public class LoginUserDto {
                 .password(member.getPassword())
                 .birthday(member.getBirthday())
                 .averagePreparationTime(member.getAveragePreparationTime())
-                .devTimePerDay(member.getDevTimePerDay())
                 .distractionAppList(member.getDistractionAppList())
+                .useNotification(member.getUseNotification())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .state(member.getState())
@@ -78,8 +75,8 @@ public class LoginUserDto {
                 .password(this.password)
                 .birthday(this.birthday)
                 .averagePreparationTime(this.averagePreparationTime)
-                .devTimePerDay(this.devTimePerDay)
                 .distractionAppList(this.distractionAppList)
+                .useNotification(this.useNotification)
                 .motivationType(this.motivationType)
                 .gender(this.gender)
                 .state(this.state)

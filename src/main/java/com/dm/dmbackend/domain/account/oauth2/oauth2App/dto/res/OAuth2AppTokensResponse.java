@@ -8,5 +8,4 @@ import lombok.Data;
 public class OAuth2AppTokensResponse {
     private String accessToken;
     private String refreshToken;
-    private boolean isNewUser;
 }

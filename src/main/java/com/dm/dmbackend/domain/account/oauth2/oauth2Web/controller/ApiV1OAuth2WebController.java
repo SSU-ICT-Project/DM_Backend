@@ -22,7 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/rest-api/v1/oauth2/web")
-@Tag(name = "OAuth2", description = "소셜로그인 API")
+@Tag(name = "OAuth2Web", description = "웹 소셜 로그인 API")
 @RequiredArgsConstructor
 public class ApiV1OAuth2WebController {
     private final AuthService authService;

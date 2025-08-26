@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/rest-api/v1/oauth2/app")
-@Tag(name = "OAuth2(App)", description = "앱 소셜 로그인 API")
+@Tag(name = "OAuth2App", description = "앱 소셜 로그인 API")
 @RequiredArgsConstructor
 public class ApiV1OAuth2AppController {
     private final OAuth2AppService oAuth2AppService;
@@ -42,17 +42,14 @@ public class ApiV1OAuth2AppController {
             memberService.signup(candidate);
             isNew = true;
         }
-
-        // 3) 우리 서비스 로그인(JWT 발급) — 소셜 로그인 플래그로 비번검증 생략
+        // 3) 기존 앱 로그인(JWT 발급) — 소셜 로그인 플래그로 비번검증 생략
         Auth auth = authService.login(
                 LoginForm.builder().email(candidate.getEmail()).build(),
                 true
         );
-
         return ApiResponse.of(new OAuth2AppTokensResponse(
                 auth.getAccessToken(),
-                auth.getRefreshToken(),
-                isNew
+                auth.getRefreshToken()
         ));
     }
 }
