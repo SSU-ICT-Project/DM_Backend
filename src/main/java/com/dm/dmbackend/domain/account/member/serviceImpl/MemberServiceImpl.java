@@ -88,7 +88,6 @@ public class MemberServiceImpl implements MemberService {
                 .gender(memberForm.getGender())
                 .birthday(memberForm.getBirthday())
                 .averagePreparationTime(memberForm.getAveragePreparationTime())
-                .devTimePerDay(memberForm.getDevTimePerDay())
                 .distractionAppList(memberForm.getDistractionAppList())
                 .build();
         memberRepository.save(member);
@@ -167,11 +166,11 @@ public class MemberServiceImpl implements MemberService {
         if (memberForm.getAveragePreparationTime() != null) {
             loginUser.setAveragePreparationTime(memberForm.getAveragePreparationTime());
         }
-        if (memberForm.getDevTimePerDay() != null) {
-            loginUser.setDevTimePerDay(memberForm.getDevTimePerDay());
-        }
         if (memberForm.getDistractionAppList() != null) {
             loginUser.setDistractionAppList(memberForm.getDistractionAppList());
+        }
+        if (memberForm.getUseNotification() != null) {
+            loginUser.setUseNotification(memberForm.getUseNotification());
         }
         if (memberForm.getMotivationType() != null) {
             loginUser.setMotivationType(memberForm.getMotivationType());
@@ -375,8 +374,8 @@ public class MemberServiceImpl implements MemberService {
                 .email(loginUser.getEmail())
                 .birthday(loginUser.getBirthday())
                 .averagePreparationTime(loginUser.getAveragePreparationTime())
-                .devTimePerDay(loginUser.getDevTimePerDay())
                 .distractionAppList(loginUser.getDistractionAppList())
+                .useNotification(loginUser.getUseNotification())
                 .motivationType(loginUser.getMotivationType())
                 .gender(loginUser.getGender())
                 .profileImageUrl(loginUser.getProfileImageUrl())
@@ -440,8 +439,8 @@ public class MemberServiceImpl implements MemberService {
                 .email(member.getEmail())
                 .birthday(member.getBirthday())
                 .averagePreparationTime(member.getAveragePreparationTime())
-                .devTimePerDay(member.getDevTimePerDay())
                 .distractionAppList(member.getDistractionAppList())
+                .useNotification(member.getUseNotification())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())
                 .profileImageUrl(member.getProfileImageUrl())

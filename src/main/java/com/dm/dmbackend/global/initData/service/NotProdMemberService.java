@@ -14,13 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto.ConvertToLoginUserDto;
 
@@ -50,11 +47,9 @@ public class NotProdMemberService {
                     .gender(i % 2 == 0 ? Member.Gender.MALE : Member.Gender.FEMALE)
                     .birthday(LocalDate.of(2001, i + 1, 1))
                     .averagePreparationTime(LocalTime.of(0, minutes))
-                    .devTimePerDay(buildDevTimePerDayShifted(i))   // 유저1: 월/화, 유저2: 화/수, ..., 유저5: 금/토
                     .distractionAppList(buildDistractionApps(i + 1)) // 1개 → 5개
                     .build();
             memberService.signup(memberForm);
-
             Member member = memberRepository.findByEmail(memberForm.getEmail())
                     .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
             members.add(member);
@@ -96,24 +91,6 @@ public class NotProdMemberService {
     }
 
     // ----------------- 헬퍼 메서드 -----------------
-
-    // 유저1: MONDAY(2슬롯), TUESDAY(1슬롯)
-    // 유저2: TUESDAY, WEDNESDAY ... 유저5: FRIDAY, SATURDAY
-    private Map<DayOfWeek, List<TimeRange>> buildDevTimePerDayShifted(int shiftDays) {
-        Map<DayOfWeek, List<TimeRange>> map = new LinkedHashMap<>();
-        DayOfWeek dayA = DayOfWeek.MONDAY.plus(shiftDays % 7);
-        DayOfWeek dayB = dayA.plus(1);
-        List<TimeRange> twoSlots = List.of(
-                tr("06:00", "07:30"),
-                tr("20:00", "22:00")
-        );
-        List<TimeRange> oneSlot = List.of(
-                tr("20:00", "22:00")
-        );
-        map.put(dayA, twoSlots);
-        map.put(dayB, oneSlot);
-        return map;
-    }
 
     // ["YouTube"] → ["YouTube","Instagram"] → ... → 최대 5개
     private List<String> buildDistractionApps(int count) {

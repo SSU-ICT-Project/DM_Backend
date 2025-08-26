@@ -8,12 +8,10 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Type;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Setter
@@ -47,11 +45,10 @@ public class Member extends BaseEntity {
 
     @Column(columnDefinition = "jsonb")
     @Type(JsonType.class)
-    private Map<DayOfWeek, List<TimeRange>> devTimePerDay;
-
-    @Column(columnDefinition = "jsonb")
-    @Type(JsonType.class)
     private List<String> distractionAppList;
+
+    @Builder.Default
+    private Boolean useNotification = true;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 11)
