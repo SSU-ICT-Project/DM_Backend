@@ -1,7 +1,7 @@
-package com.dm.dmbackend.domain.account.oauth2.serviceImpl;
+package com.dm.dmbackend.domain.account.oauth2.oauth2Web.serviceImpl;
 
-import com.dm.dmbackend.domain.account.oauth2.dto.res.OAuth2Properties;
-import com.dm.dmbackend.domain.account.oauth2.service.OAuth2Service;
+import com.dm.dmbackend.domain.account.oauth2.oauth2Web.dto.res.OAuth2WebProperties;
+import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -17,13 +17,13 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OAuth2ServiceImpl implements OAuth2Service {
+public class OAuth2WebServiceImpl implements OAuth2WebService {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final OAuth2Properties oAuth2Properties;
+    private final OAuth2WebProperties oAuth2WebProperties;
 
     // 소셜 로그인 리디렉션 URL 생성
     public String getAuthUrl(String provider) {
-        OAuth2Properties.ProviderProperties providerProps = oAuth2Properties.getProviders().get(provider);
+        OAuth2WebProperties.ProviderProperties providerProps = oAuth2WebProperties.getProviders().get(provider);
         if (providerProps == null) {
             throw new IllegalArgumentException("지원되지 않는 OAuth2 제공자: " + provider);
         }
@@ -63,7 +63,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
     // 소셜 로그인
     public Map<String, String> getUserInfo(String provider, String code) {
-        OAuth2Properties.ProviderProperties providerProps = oAuth2Properties.getProviders().get(provider);
+        OAuth2WebProperties.ProviderProperties providerProps = oAuth2WebProperties.getProviders().get(provider);
         if (providerProps == null) {
             throw new IllegalArgumentException("지원되지 않는 OAuth2 제공자: " + provider);
         }
@@ -71,7 +71,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         return getUserInfoFromProvider(provider, providerProps.getUserInfoUri(), accessToken);
     }
 
-    private String getAccessToken(String provider, OAuth2Properties.ProviderProperties providerProps, String code) {
+    private String getAccessToken(String provider, OAuth2WebProperties.ProviderProperties providerProps, String code) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 

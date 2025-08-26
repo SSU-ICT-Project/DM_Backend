@@ -37,6 +37,15 @@ custom:
   jwt:
     secretKey: ${JWT_SECRET_KEY}
   accessToken:
-    expiration: "#{60 * 60 * 1000}"   # 1시간
+    expiration: "#{365 * 24 * 60 * 60 * 1000}"   # 1년    앱 기준
   refreshToken:
-    expiration: "#{60 * 60 * 24 * 7 * 1000}"   # 7일
+    expiration: "#{365 * 7 * 24 * 60 * 60 * 1000}"   # 7년
+
+oauth2:
+  providers:
+    google:
+      clientId: YOUR_GOOGLE_SERVER_CLIENT_ID
+    kakao:
+      userInfoUri: https://kapi.kakao.com/v2/user/me
+    naver:
+      userInfoUri: https://openapi.naver.com/v1/nid/me

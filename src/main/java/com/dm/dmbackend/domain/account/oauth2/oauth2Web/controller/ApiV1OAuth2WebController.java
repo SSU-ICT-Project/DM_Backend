@@ -1,4 +1,4 @@
-package com.dm.dmbackend.domain.account.oauth2.controller;
+package com.dm.dmbackend.domain.account.oauth2.oauth2Web.controller;
 
 import com.dm.dmbackend.domain.account.auth.dto.req.LoginForm;
 import com.dm.dmbackend.domain.account.auth.dto.res.Auth;
@@ -6,7 +6,7 @@ import com.dm.dmbackend.domain.account.auth.service.AuthService;
 import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
-import com.dm.dmbackend.domain.account.oauth2.service.OAuth2Service;
+import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,12 +21,12 @@ import java.net.URI;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/rest-api/v1/oauth2")
+@RequestMapping("/rest-api/v1/oauth2/web")
 @Tag(name = "OAuth2", description = "소셜로그인 API")
 @RequiredArgsConstructor
-public class ApiV1OAuth2Controller {
+public class ApiV1OAuth2WebController {
     private final AuthService authService;
-    private final OAuth2Service oAuth2Service;
+    private final OAuth2WebService oAuth2WebService;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
 
@@ -37,7 +37,7 @@ public class ApiV1OAuth2Controller {
     @GetMapping("/redirect-url/{provider}")
     @Operation(summary = "소셜 로그인 리디렉션 URL")
     public ApiResponse<String> redirectToProvider(@PathVariable("provider") String provider) {
-        String authUrl = oAuth2Service.getAuthUrl(provider);
+        String authUrl = oAuth2WebService.getAuthUrl(provider);
         return ApiResponse.of(authUrl);
     }
 
@@ -49,7 +49,7 @@ public class ApiV1OAuth2Controller {
             @RequestParam("code") String code) {
 
         // 소셜 유저 정보 조회
-        Map<String, String> socialUser = oAuth2Service.getUserInfo(provider, code);
+        Map<String, String> socialUser = oAuth2WebService.getUserInfo(provider, code);
         String email = socialUser.get("email");
         String name = socialUser.get("name");
 
