@@ -28,7 +28,7 @@ public class ScreenTime extends BaseEntity {
     @Column(length = 20)
     private String accessAppData;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String message;
 
     @Enumerated(EnumType.STRING)

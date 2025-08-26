@@ -21,8 +21,8 @@ public class Notification extends BaseEntity {
     private Long receiverId;
     private Long objectId;
     private String title;
-    
-    @Column(length = 500)
+
+    @Column(length = 1000)
     private String content;
 
     @Builder.Default

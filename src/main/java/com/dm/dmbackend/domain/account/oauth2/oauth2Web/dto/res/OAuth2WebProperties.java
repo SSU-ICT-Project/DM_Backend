@@ -1,4 +1,4 @@
-package com.dm.dmbackend.domain.account.oauth2.dto.res;
+package com.dm.dmbackend.domain.account.oauth2.oauth2Web.dto.res;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "app.oauth2")
 @Getter
 @Setter
-public class OAuth2Properties {
+public class OAuth2WebProperties {
     private Map<String, ProviderProperties> providers = new HashMap<>();
 
     @Getter
