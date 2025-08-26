@@ -6,7 +6,6 @@ import com.dm.dmbackend.domain.goal.mainGoal.service.MainGoalService;
 import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContext;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.res.ScreenTimeMessageResponse;
 import com.dm.dmbackend.domain.llm.screenTime.entity.ScreenTime;
 import com.dm.dmbackend.domain.llm.screenTime.repository.ScreenTimeRepository;
 import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
@@ -14,6 +13,7 @@ import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
 import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.dm.dmbackend.global.common.utils.validator.NotificationValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +44,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     @Transactional
     public void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest,
                                                          LoginUserDto loginUser) {
+        NotificationValidator.validateNotification(loginUser);
         String ragInput = toCureRagPayload(screenTimeCureRequest);
         UserContext ctx = buildUserContext(loginUser);
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
@@ -84,6 +85,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     @Transactional
     public void getScreenTimeMotivate(ScreenTimeMotivateRequest screenTimeMotivateRequest,
                                       LoginUserDto loginUser){
+        NotificationValidator.validateNotification(loginUser);
         String accessAppData = screenTimeMotivateRequest.getAccessAppData();
         UserContext ctx = buildUserContext(loginUser);
         // 목표 구체화 먼저 생성
@@ -174,14 +176,6 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         // RAG용 목표 요약 (상위 3개)
         String goalSummary = mainGoalService.buildCompactGoalSummary(loginUser, 3);
         return new UserContext(motivationPrompt, userData, goalSummary);
-    }
-
-    // ScreenTime을 ScreenTimeReviewResponse로 변환
-    private ScreenTimeMessageResponse screenTimeConvertToScreenTimeMessageResponse(ScreenTime screenTime) {
-        return ScreenTimeMessageResponse.builder()
-                .id(screenTime.getId())
-                .message(screenTime.getMessage())
-                .build();
     }
 
     // 앱별 사용시간을 합산·정렬한 최소 JSON 생성
