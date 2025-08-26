@@ -47,9 +47,15 @@ public class SubGoalServiceImpl implements SubGoalService {
                 .orElseThrow(() -> new ServiceException(ReturnCode.SUB_GOAL_NOT_FOUND));
         // 작성자 검증 아닌 경우 예외 처리
         validateSubGoalOwner(subGoal, loginUser);
-        subGoal.setContent(subGoalRequest.getContent());
-        subGoal.setDeadline(subGoalRequest.getDeadline());
-        subGoal.setChecked(subGoalRequest.getChecked());
+        if (subGoalRequest.getContent() != null) {
+            subGoal.setContent(subGoalRequest.getContent());
+        }
+        if (subGoalRequest.getDeadline() != null) {
+            subGoal.setDeadline(subGoalRequest.getDeadline());
+        }
+        if (subGoalRequest.getChecked() != null) { // Boolean 래퍼 타입이어야 null 체크 가능
+            subGoal.setChecked(subGoalRequest.getChecked());
+        }
         subGoalRepository.save(subGoal);
     }
 

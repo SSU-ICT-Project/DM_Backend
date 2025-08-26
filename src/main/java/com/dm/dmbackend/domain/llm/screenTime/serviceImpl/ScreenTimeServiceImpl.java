@@ -4,14 +4,14 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.goal.mainGoal.service.MainGoalService;
 import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContext;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
+import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
 import com.dm.dmbackend.domain.llm.screenTime.dto.res.ScreenTimeMessageResponse;
 import com.dm.dmbackend.domain.llm.screenTime.entity.ScreenTime;
 import com.dm.dmbackend.domain.llm.screenTime.repository.ScreenTimeRepository;
 import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
+import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
 import com.dm.dmbackend.domain.notification.entity.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,20 +44,19 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     @Transactional
     public void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest,
                                                          LoginUserDto loginUser) {
-        String screenTimeData = screenTimeCureRequest.getScreenTimeData();
+        String ragInput = toCureRagPayload(screenTimeCureRequest);
         UserContext ctx = buildUserContext(loginUser);
-
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
         String cureMessage = cure.message(
                 ctx.getMotivationPrompt(),
-                nvl(screenTimeData),
+                nvl(ragInput),
                 nvl(ctx.getGoalSummary()),
                 ctx.getUserData()
         );
         // DB 저장
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
-                .screenTimeData(screenTimeData)
+                .screenTimeData(ragInput)
                 .message(cureMessage)
                 .messageType(ScreenTime.MessageType.CURE)
                 .build();
@@ -181,5 +182,36 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .id(screenTime.getId())
                 .message(screenTime.getMessage())
                 .build();
+    }
+
+    // 앱별 사용시간을 합산·정렬한 최소 JSON 생성
+    private String toCureRagPayload(ScreenTimeCureRequest req) {
+        List<ScreenTimeCureRequest.AppUsage> usages =
+                Optional.ofNullable(req.getAppUsages()).orElseGet(Collections::emptyList);
+        // appName 기준 합산(동일 앱 중복 보고 대비)
+        Map<String, Integer> byApp = usages.stream()
+                .filter(u -> u.getAppName() != null && !u.getAppName().isBlank())
+                .collect(Collectors.toMap(
+                        u -> u.getAppName().trim(),
+                        ScreenTimeCureRequest.AppUsage::getUsageTimeMinutes,
+                        Integer::sum,
+                        LinkedHashMap::new
+                ));
+        // 사용시간 내림차순 정렬 후 리스트로 변환
+        List<Map<String, Object>> apps = byApp.entrySet().stream()
+                .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())
+                .map(e -> Map.<String, Object>of(
+                        "appName", e.getKey(),
+                        "usageTimeMinutes", e.getValue()
+                ))
+                .collect(Collectors.toList());
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("totalScreenTimeMinutes", req.getTotalScreenTime());
+        payload.put("apps", apps);
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to build RAG payload", e);
+        }
     }
 }
