@@ -1,12 +1,10 @@
 package com.dm.dmbackend.domain.llm.ingest.serviceImpl;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.llm.ingest.service.IngestService;
 import com.dm.dmbackend.domain.llm.thesis.entity.Thesis;
 import com.dm.dmbackend.domain.llm.thesis.repository.ThesisRepository;
-import com.dm.dmbackend.global.exception.ReturnCode;
-import com.dm.dmbackend.global.exception.ServiceException;
+import com.dm.dmbackend.global.common.utils.validator.RoleValidator;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.apache.pdfbox.ApachePdfBoxDocumentParser;
@@ -43,7 +41,7 @@ public class IngestServiceImpl implements IngestService {
     @Transactional
     public void ingestAll(LoginUserDto loginUser) {
         // ROLE_ADMIN 검증
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
         List<Thesis> allTheses = thesisRepository.findAll();
         for (Thesis thesis : allTheses) {
             String pdfUrl = thesis.getThesisPdfUrl();
@@ -99,7 +97,7 @@ public class IngestServiceImpl implements IngestService {
     @Override
     @Transactional(readOnly = true)
     public long getEmbeddingCount(LoginUserDto loginUser) {
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
         Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM screen_time_embeddings", Long.class);
         return count != null ? count : 0L;
     }
@@ -109,16 +107,7 @@ public class IngestServiceImpl implements IngestService {
     @Transactional
     public void clearAll(LoginUserDto loginUser) {
         // ROLE_ADMIN 검증
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
         jdbcTemplate.update("TRUNCATE TABLE screen_time_embeddings");
-    }
-
-    // ----------------- 헬퍼 메서드 -----------------
-
-    // ROLE_ADMIN 아닌 경우 예외 처리
-    public static void validateAdminRole(LoginUserDto loginUser) {
-        if (loginUser.getRole() != Member.MemberRole.ROLE_ADMIN) {
-            throw new ServiceException(ReturnCode.NOT_AUTHORIZED);
-        }
     }
 }

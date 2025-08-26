@@ -1,13 +1,13 @@
 package com.dm.dmbackend.domain.llm.thesis.serviceImpl;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.llm.thesis.dto.req.ThesisDeleteRequest;
 import com.dm.dmbackend.domain.llm.thesis.dto.res.ThesisResponse;
 import com.dm.dmbackend.domain.llm.thesis.entity.Thesis;
 import com.dm.dmbackend.domain.llm.thesis.entity.ThesisPage;
 import com.dm.dmbackend.domain.llm.thesis.repository.ThesisRepository;
 import com.dm.dmbackend.domain.llm.thesis.service.ThesisService;
+import com.dm.dmbackend.global.common.utils.validator.RoleValidator;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
 import com.dm.dmbackend.global.s3.S3Service;
@@ -34,7 +34,7 @@ public class ThesisServiceImpl implements ThesisService {
     @Transactional
     public void uploadThesis(List<MultipartFile> pdfFiles, LoginUserDto loginUser){
         // ROLE_ADMIN 아닌 경우 예외 처리
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
 
         // 이미지 파일 검증
         if (pdfFiles == null || pdfFiles.isEmpty() || pdfFiles.size() > 10) {
@@ -62,7 +62,7 @@ public class ThesisServiceImpl implements ThesisService {
     @Transactional(readOnly = true)
     public Page<ThesisResponse> getThesis(Pageable pageable, LoginUserDto loginUser){
         // ROLE_ADMIN 아닌 경우 예외 처리
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
         checkPageSize(pageable.getPageSize());
         Page<Thesis> thesisPage = thesisRepository.findByMemberId(loginUser.getId(), pageable);
         return thesisPage.map(this::convertToThesisResponse);
@@ -73,7 +73,7 @@ public class ThesisServiceImpl implements ThesisService {
     @Transactional
     public void deleteThesis(ThesisDeleteRequest thesisDeleteRequest, LoginUserDto loginUser){
         // ROLE_ADMIN 아닌 경우 예외 처리
-        validateAdminRole(loginUser);
+        RoleValidator.validateAdmin(loginUser);
         List<Thesis> theses = thesisRepository.findAllByIdIn(thesisDeleteRequest.getThesisIdList());
         for (Thesis thesis : theses) {
             s3Service.deleteFile(thesis.getThesisPdfUrl());
@@ -88,13 +88,6 @@ public class ThesisServiceImpl implements ThesisService {
         int maxPageSize = ThesisPage.getMaxPageSize();
         if (pageSize > maxPageSize) {
             throw new ServiceException(ReturnCode.PAGE_REQUEST_FAIL);
-        }
-    }
-
-    // ROLE_ADMIN 아닌 경우 예외 처리
-    public static void validateAdminRole(LoginUserDto loginUser) {
-        if (loginUser.getRole() != Member.MemberRole.ROLE_ADMIN) {
-            throw new ServiceException(ReturnCode.NOT_AUTHORIZED);
         }
     }
 

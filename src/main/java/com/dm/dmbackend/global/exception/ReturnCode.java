@@ -130,6 +130,7 @@ public enum ReturnCode {
     NOT_AUTHORIZED(401, "NOTIFICATION_003", "권한이 없습니다."),
     NAVI_VALIDATE_ERROR(400, "NOTIFICATION_004", "navigationData에 필수 키가 없습니다"),
     ARGS_VALIDATE_ERROR(400, "NOTIFICATION_005", "메시지 인자가 부족합니다."),
+    NOTIFICATION_DISABLED(404, "NOTIFICATION_006", "알림이 비활성화 상태입니다."),
 
     // Business 에러 (500번대)
     INTERNAL_ERROR(500, "SYS_001", "내부 시스템 에러"),
