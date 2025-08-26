@@ -44,7 +44,6 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     @Transactional
     public void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest,
                                                          LoginUserDto loginUser) {
-        NotificationValidator.validateNotification(loginUser);
         String ragInput = toCureRagPayload(screenTimeCureRequest);
         UserContext ctx = buildUserContext(loginUser);
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
@@ -72,6 +71,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .content(cureMessage)
                 .targetObject(Notification.TargetObject.Cure)
                 .build();
+        NotificationValidator.validateNotification(loginUser);
         try {
             String message = objectMapper.writeValueAsString(notification);
             kafkaTemplate.send("cure-topic", message);
@@ -126,6 +126,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .content(motivateMessage)
                 .targetObject(Notification.TargetObject.Motivate)
                 .build();
+        NotificationValidator.validateNotification(loginUser);
         try {
             String message = objectMapper.writeValueAsString(notification);
             kafkaTemplate.send("motivate-topic", message);
