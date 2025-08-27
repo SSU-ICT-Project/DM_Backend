@@ -1,5 +1,6 @@
 package com.dm.dmbackend.domain.schedule.servicelmpl;
 
+import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.schedule.dto.req.RequestDto;
@@ -120,5 +121,9 @@ public class ScheduleServicelmpl implements ScheduleService {
         return DMPage.of(dtoPage);
     }
 
+    @Override
+    @Transactional
+    public void getPrepareMessage(LoginUserDto loginUser){
 
+    }
 }

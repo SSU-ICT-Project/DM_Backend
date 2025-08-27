@@ -51,13 +51,12 @@ public class Member extends BaseEntity {
     private Boolean useNotification = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 11)
+    @Column(length = 16)
     private MotivationType motivationType;
     public enum MotivationType {
-        EMOTIONAL,   // 감성 자극형
-        VISION,      // 미래/비전 제시형
-        ACTION,      // 구체적 행동 제시형
-        COMPETITION  // 비교/경쟁 자극형
+        HABITUAL_WATCHER,   // 습관적 시청형
+        COMFORT_SEEKER,      // 위로 추구형
+        THRILL_SEEKER      // 자극 추구형
     }
 
     @Enumerated(EnumType.STRING)

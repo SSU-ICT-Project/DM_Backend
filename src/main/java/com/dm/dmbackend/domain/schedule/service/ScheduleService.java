@@ -1,6 +1,7 @@
 package com.dm.dmbackend.domain.schedule.service;
 
 
+import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.schedule.dto.req.RequestDto;
 import com.dm.dmbackend.domain.schedule.dto.req.ScheduleUpdateDto;
 import com.dm.dmbackend.domain.schedule.dto.res.ResponseDto;
@@ -20,5 +21,5 @@ public interface ScheduleService  {
     void delete(Long scheduleId, Long userId);
     DMPage<ResponseDto> getSchedulesForDate(LocalDate localDate, Long userId, Pageable pageable);
     DMPage<ResponseDto> getSchedulesForMonth(YearMonth yearMonth,Long userId, Pageable pageable);
-
+    void getPrepareMessage(LoginUserDto loginUser);
 }

@@ -31,7 +31,7 @@ import java.time.YearMonth;
 @RequiredArgsConstructor
 @Tag(name = "Schedule", description = "일정 API")
 public class ScheduleController {
-
+    private final ScheduleServicelmpl scheduleService;
     private final ScheduleServicelmpl scheduleServicelmpl;
 
     @PostMapping
@@ -96,4 +96,10 @@ public class ScheduleController {
         return ApiResponse.of(schedules);
     }
 
+    @PostMapping("/prepareMessage")
+    @Operation(summary = "준비시간 알림 메시지 생성")
+    public ApiResponse<String> getPrepareMessage(@LoginUser LoginUserDto loginUser) {
+        scheduleService.getPrepareMessage(loginUser);
+        return ApiResponse.of(ReturnCode.SUCCESS);
+    }
 }
