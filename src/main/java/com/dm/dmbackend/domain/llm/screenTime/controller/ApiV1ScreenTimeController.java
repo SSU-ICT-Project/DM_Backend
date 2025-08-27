@@ -3,7 +3,6 @@ package com.dm.dmbackend.domain.llm.screenTime.controller;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUser;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import com.dm.dmbackend.global.exception.ReturnCode;
@@ -35,9 +34,8 @@ public class ApiV1ScreenTimeController {
     // 동기부여 메시지 생성
     @PostMapping("/motivate")
     @Operation(summary = "동기부여 메시지 생성")
-    public ApiResponse<String> getScreenTimeMotivate(@RequestBody @Valid ScreenTimeMotivateRequest screenTimeMotivateRequest,
-                                                                     @LoginUser LoginUserDto loginUser) {
-        screenTimeService.getScreenTimeMotivate(screenTimeMotivateRequest, loginUser);
+    public ApiResponse<String> getScreenTimeMotivate(@LoginUser LoginUserDto loginUser) {
+        screenTimeService.getScreenTimeMotivate(loginUser);
         return ApiResponse.of(ReturnCode.SUCCESS);
     }
 }

@@ -5,10 +5,8 @@ import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.goal.mainGoal.service.MainGoalService;
 import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContext;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
-import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeMotivateRequest;
 import com.dm.dmbackend.domain.llm.screenTime.entity.ScreenTime;
 import com.dm.dmbackend.domain.llm.screenTime.repository.ScreenTimeRepository;
-import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
@@ -23,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,6 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     private final MainGoalService mainGoalService;
     private final ScreenTimeCure cure;
     private final ScreenTimeMotivate motivate;
-    private final GoalDetail goalDetail;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
@@ -53,6 +52,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 nvl(ctx.getGoalSummary()),
                 ctx.getUserData()
         );
+        cureMessage = cureMessage.replaceAll("\\s*\\n\\s*", " ");
         // DB 저장
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
@@ -83,35 +83,21 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     // 동기부여 메시지 생성
     @Override
     @Transactional
-    public void getScreenTimeMotivate(ScreenTimeMotivateRequest screenTimeMotivateRequest,
-                                      LoginUserDto loginUser){
+    public void getScreenTimeMotivate(LoginUserDto loginUser){
         NotificationValidator.validateNotification(loginUser);
-        String accessAppData = screenTimeMotivateRequest.getAccessAppData();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         UserContext ctx = buildUserContext(loginUser);
-        // 목표 구체화 먼저 생성
-        String goalDetailMsg;
-        try {
-            goalDetailMsg = goalDetail.message(
-                    ctx.getMotivationPrompt(),
-                    nvl(ctx.getGoalSummary()),
-                    ctx.getUserData()
-            );
-        } catch (Exception e) {
-            log.warn("GoalDetail LLM failed: {}", e.toString());
-            goalDetailMsg = ""; // 안전한 폴백
-        }
         // 동기부여 메시지 생성 (goal_detail 주입!)
         String motivateMessage = motivate.message(
                 ctx.getMotivationPrompt(),
-                nvl(accessAppData),
+                nvl(LocalTime.now().format(formatter)),
                 nvl(ctx.getGoalSummary()),
-                nvl(goalDetailMsg),
                 ctx.getUserData()
         );
+        motivateMessage = motivateMessage.replaceAll("\\s*\\n\\s*", " ");
         // DB 저장
         ScreenTime screenTime = ScreenTime.builder()
                 .member(loginUser.ConvertToMember())
-                .accessAppData(accessAppData)
                 .message(motivateMessage)
                 .messageType(ScreenTime.MessageType.MOTIVATE)
                 .build();
@@ -141,27 +127,22 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
 
     // 동기부여 프롬프트 매핑
     private String mapMotivationPrompt(Member.MotivationType type) {
-        Member.MotivationType t = (type == null) ? Member.MotivationType.ACTION : type;
+        Member.MotivationType t = (type == null) ? Member.MotivationType.HABITUAL_WATCHER : type;
         return switch (t) {
-            case EMOTIONAL -> """
-            감성 자극형:
-            - 따뜻한 공감과 위로를 중심으로 메시지를 작성하세요.
-            - 사용자의 감정을 이해하고 격려하는 톤을 사용하세요.
+            case HABITUAL_WATCHER -> """
+                습관적 시청형:
+                치료 방향 -> 습관 깨기, 짧은 대체 행동
+                예시 -> “지금 5분만 멈추면, 내일이 달라집니다.”
             """;
-            case VISION -> """
-            미래/비전 제시형:
-            - 장기적인 목표와 긍정적인 미래를 강조하세요.
-            - 사용자가 지금의 행동이 미래의 성취로 이어진다는 점을 부각하세요.
+            case COMFORT_SEEKER -> """
+                위로 추구형:
+                치료 방향 -> 공감, 정서 회복, 작은 성취 경험
+                예시 -> “피곤할 땐 쉬어도 돼요. 하지만 진짜 회복은 목표에 다가설 때 옵니다.”
             """;
-            case ACTION -> """
-            구체적 행동 제시형:
-            - 지금 바로 실천 가능한 구체적인 행동을 제안하세요.
-            - 사용자가 즉시 따라할 수 있도록 명확한 지시를 포함하세요.
-            """;
-            case COMPETITION -> """
-            비교/경쟁 자극형:
-            - 다른 사람과의 비교나 경쟁심을 유발하는 메시지를 작성하세요.
-            - 더 나은 성과를 향해 도전하도록 동기를 부여하세요.
+            case THRILL_SEEKER -> """
+                자극 추구형:
+                치료 방향 -> 도전·경쟁심 자극, 단기 챌린지 제시
+                예시 -> “쇼츠가 널 잡을까, 네가 이길까? 지금 선택해보세요.”
             """;
         };
     }

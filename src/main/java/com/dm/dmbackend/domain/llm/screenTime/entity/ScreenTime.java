@@ -22,11 +22,8 @@ public class ScreenTime extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "screen_time_data", columnDefinition = "text", nullable = false)
+    @Column(name = "screen_time_data", columnDefinition = "text")
     private String screenTimeData;
-
-    @Column(length = 20)
-    private String accessAppData;
 
     @Column(length = 1000)
     private String message;

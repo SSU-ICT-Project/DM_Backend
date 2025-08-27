@@ -1,6 +1,5 @@
 package com.dm.dmbackend.global.config;
 
-import com.dm.dmbackend.domain.llm.screenTime.service.GoalDetail;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
 import dev.langchain4j.model.chat.ChatModel;
@@ -102,14 +101,6 @@ public class LlmConfig {
     @Bean
     public ScreenTimeMotivate screenTimeMotivate(ChatModel chatModel) {
         return AiServices.builder(ScreenTimeMotivate.class)
-                .chatModel(chatModel)
-                .build();
-    }
-
-    // RAG 사용X
-    @Bean
-    public GoalDetail goalDetail(ChatModel chatModel) {
-        return AiServices.builder(GoalDetail.class)
                 .chatModel(chatModel)
                 .build();
     }
