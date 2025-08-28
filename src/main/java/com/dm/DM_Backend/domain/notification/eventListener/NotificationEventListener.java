@@ -28,10 +28,11 @@ public class NotificationEventListener {
     private final FcmService fcmService;
     private final FcmTokenService fcmTokenService;
     private final Map<String, NotificationMeta> notificationMetaMap = Map.of(
-            "follow-topic", new NotificationMeta("팔로우 알림", "follow-topic-dlt")
+            "follow-topic", new NotificationMeta("팔로우 알림", "follow-topic-dlt"),
+            "smart-reminder-topic", new NotificationMeta("시간계산 에이전트 알림 🔔", "smart-reminder-topic-dlt")
     );
 
-    @KafkaListener(topics = {"follow-topic"}, groupId = "1")
+    @KafkaListener(topics = {"follow-topic","smart-reminder-topic"}, groupId = "1")
     public void consume(ConsumerRecord<String, String> record) {
         String topic = record.topic();
         String message = record.value();
@@ -52,13 +53,19 @@ public class NotificationEventListener {
                 notificationService.createNotification(notification);
                 String fcmToken = fcmTokenService.getFcmToken(notification.getReceiverId());
                 if (fcmToken != null) {
-                    NotificationDto notificationDto = notificationService.convertToNotificationDto(notification);
-                    String bodyJson = objectMapper.writeValueAsString(notificationDto); // JSON 직렬화
-
+                    String fcmBody;
+                    if (notification.getTargetObject() == Notification.TargetObject.Schedule) {
+                        // 스마트 알림이면, content 필드를 그대로 사용합니다.
+                        fcmBody = notification.getContent();
+                    } else {
+                        // 기존 팔로우 알림의 경우, DTO를 JSON으로 변환합니다.
+                        NotificationDto notificationDto = notificationService.convertToNotificationDto(notification);
+                        fcmBody = objectMapper.writeValueAsString(notificationDto);
+                    }
                     FcmMessage fcmMessage = FcmMessage.builder()
                             .targetToken(fcmToken)
                             .title(title)
-                            .body(bodyJson) // JSON 문자열로 설정
+                            .body(fcmBody) // JSON 문자열로 설정
                             .build();
                     fcmService.sendMessageTo(fcmMessage);
                 } else {

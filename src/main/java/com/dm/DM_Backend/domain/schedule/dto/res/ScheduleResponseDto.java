@@ -13,7 +13,6 @@ public class ScheduleResponseDto {
     private final String scheduleName;
     private final LocalDateTime scheduleStartTime;
     private final LocalDateTime scheduleEndTime;
-    private final String location;
     private final String memo;
     private final boolean d_Day;
     private final boolean autoTimeCheck;
@@ -24,7 +23,6 @@ public class ScheduleResponseDto {
         this.scheduleName = schedule.getScheduleName();
         this.scheduleStartTime = schedule.getScheduleStartTime();
         this.scheduleEndTime = schedule.getScheduleEndTime();
-        this.location = schedule.getLocation();
         this.memo = schedule.getMemo();
         this.d_Day = schedule.isD_Day();
         this.autoTimeCheck = schedule.isAutoTimeCheck();

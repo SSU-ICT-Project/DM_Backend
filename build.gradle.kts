@@ -82,6 +82,9 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.3.0-beta9")
     // 5) pgvector 추가
     implementation("dev.langchain4j:langchain4j-pgvector:1.3.0-beta9")
+
+//    implementation("org.bsc.langgraph4j:langgraph4j-langchain4j:1.6.1")
+
 }
 
 tasks.withType<Test> {

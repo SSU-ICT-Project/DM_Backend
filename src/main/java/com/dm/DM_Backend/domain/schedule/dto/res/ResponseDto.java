@@ -26,7 +26,6 @@ public class ResponseDto {
         this.scheduleName = schedule.getScheduleName();
         this.scheduleStartTime = schedule.getScheduleStartTime();
         this.scheduleEndTime = schedule.getScheduleEndTime();
-        this.location = schedule.getLocation();
         this.memo = schedule.getMemo();
         this.d_Day = schedule.isD_Day();
         this.autoTimeCheck = schedule.isAutoTimeCheck();

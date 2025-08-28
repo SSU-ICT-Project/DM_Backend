@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
+//test
+import com.dm.DM_Backend.domain.schedule.scheduler.ScheduleNotificationScheduler;
+import org.springframework.context.annotation.Profile; // Profile 어노테이션 import
 
 
 @RestController
@@ -38,13 +41,10 @@ public class ScheduleController {
     @Operation(summary = "일정 생성")
     public ApiResponse<ResponseDto> createSchedule(@RequestBody RequestDto requestDto,
                                                       @LoginUser LoginUserDto loginUser) {
-
         //서비스가 반환한 생성된 Schedule 엔티티 저장
         Schedule createdSchedule = scheduleServicelmpl.createSchedule(requestDto, loginUser.getId());
 
-
         return ApiResponse.of(ReturnCode.SUCCESS);
-
     }
 
     @GetMapping("/{scheduleId}")
@@ -94,6 +94,17 @@ public class ScheduleController {
         DMPage<ResponseDto> schedules = scheduleServicelmpl.getSchedulesForMonth(yearMonth,loginUser.getId(),pageable);
 
         return ApiResponse.of(schedules);
+    }
+
+    private final ScheduleNotificationScheduler scheduleNotificationScheduler; // ✨ 스케줄러 주입
+
+
+    @Profile("!prod") // prod(운영) 프로필이 아닐 때만 이 API를 활성화
+    @GetMapping("/test/trigger-scheduler")
+    @Operation(summary = "[테스트용] 스마트 알림 스케줄러 수동 실행")
+    public ApiResponse<String> testTrigger() {
+        scheduleNotificationScheduler.triggerSmartNotification();
+        return ApiResponse.of("Scheduler triggered successfully!");
     }
 
 }

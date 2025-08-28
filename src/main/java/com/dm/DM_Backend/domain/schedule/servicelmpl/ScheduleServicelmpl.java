@@ -70,7 +70,10 @@ public class ScheduleServicelmpl implements ScheduleService {
         schedule.setScheduleName(updateDto.getScheduleName());
         schedule.setScheduleStartTime(updateDto.getScheduleStartTime());
         schedule.setScheduleEndTime(updateDto.getScheduleEndTime());
-        schedule.setLocation(updateDto.getLocation());
+        schedule.setLatitude(updateDto.getLatitude());
+        schedule.setLongitude(updateDto.getLongitude());
+        schedule.setPlaceName(updateDto.getPlaceName());
+        schedule.setPlaceAddress(updateDto.getPlaceAddress());
         schedule.setMemo(updateDto.getMemo());
         schedule.setD_Day(updateDto.isD_Day());
         schedule.setAutoTimeCheck(updateDto.isAutoTimeCheck());

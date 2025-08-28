@@ -135,4 +135,5 @@ public class ApiV1MemberController {
         memberService.removeFollowed(memberId, loginUser);
         return ApiResponse.of(ReturnCode.SUCCESS);
     }
+
 }

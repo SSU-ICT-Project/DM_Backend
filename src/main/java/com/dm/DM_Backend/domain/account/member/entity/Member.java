@@ -2,11 +2,13 @@ package com.dm.DM_Backend.domain.account.member.entity;
 
 import com.dm.DM_Backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,16 @@ public class Member extends BaseEntity {
 
     @Column(length = 1000)
     private String password;
+
+    @Column(length = 50)
+    private String placeAddress;
+
+    @Column(length = 50)
+    private String latitude;
+
+    @Column(length = 50)
+    private String longitude;
+
 
     @Enumerated(EnumType.STRING)
     @Column(length = 11)
@@ -85,4 +97,5 @@ public class Member extends BaseEntity {
     private List<MemberFollowReq> followRecList = new ArrayList<>();
 
     private LocalDate birthday;
+
 }

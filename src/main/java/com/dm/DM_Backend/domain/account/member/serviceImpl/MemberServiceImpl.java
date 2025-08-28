@@ -87,8 +87,13 @@ public class MemberServiceImpl implements MemberService {
                 .motivationType(memberForm.getMotivationType())
                 .gender(memberForm.getGender())
                 .birthday(memberForm.getBirthday())
+                .latitude(memberForm.getLatitude())
+                .longitude(memberForm.getLongitude())
+                .placeAddress((memberForm.getPlaceAddress()))
                 .build();
+        log.info("회원가입 요청 - homeAddress: {}{}", memberForm.getLongitude(), memberForm.getLatitude());
         memberRepository.save(member);
+
     }
 
     // 본인 회원정보 조회
@@ -467,4 +472,5 @@ public class MemberServiceImpl implements MemberService {
                 )
                 .build();
     }
+
 }

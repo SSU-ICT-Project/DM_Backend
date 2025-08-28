@@ -27,4 +27,5 @@ public class DetailMemberDto {
     private List<SimpleMember> followedList;
     private List<SimpleMember> followReqList;
     private List<SimpleMember> followRecList;
+    private String homeAdresse;
 }

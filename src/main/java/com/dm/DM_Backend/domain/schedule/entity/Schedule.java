@@ -31,8 +31,18 @@ public class Schedule extends BaseEntity {
 
     private LocalDateTime scheduleEndTime;
 
+
     @Column(length = 50)
-    private String location;
+    private String placeName;
+
+    @Column(length = 50)
+    private String placeAddress;
+
+    @Column(length = 50)
+    private String latitude;
+
+    @Column(length = 50)
+    private String longitude;
 
     @Column(length = 200)
     private String memo;
@@ -40,5 +50,9 @@ public class Schedule extends BaseEntity {
     private boolean d_Day;
 
     private boolean autoTimeCheck;
+
+
+    private boolean notified;
+
 
 }

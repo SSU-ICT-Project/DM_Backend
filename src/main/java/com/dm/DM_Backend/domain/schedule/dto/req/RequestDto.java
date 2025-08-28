@@ -15,7 +15,10 @@ public class RequestDto {
     private String scheduleName;
     private LocalDateTime scheduleStartTime;
     private LocalDateTime scheduleEndTime;
-    private String location;
+    private String placeName;
+    private String PlaceAddress;
+    private String latitude;
+    private String longitude;
     private String memo;
     private boolean d_Day;
     private boolean autoTimeCheck;
@@ -27,9 +30,13 @@ public class RequestDto {
                 .scheduleName(this.scheduleName)
                 .scheduleStartTime(this.scheduleStartTime)
                 .scheduleEndTime(this.scheduleEndTime)
-                .location(this.location)
+                .placeName(this.placeName)
+                .placeAddress(this.PlaceAddress)
+                .latitude(this.latitude)
+                .longitude(this.longitude)
                 .memo(this.memo)
                 .d_Day(this.d_Day)
+                .notified(false)
                 .autoTimeCheck(this.autoTimeCheck)
                 .build();
     }

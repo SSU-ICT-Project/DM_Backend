@@ -30,6 +30,6 @@ public class Notification extends BaseEntity {
     @Column(length = 10)
     private TargetObject targetObject;
     public enum TargetObject {
-        Comment, Follow, Post
+        Comment, Follow, Post,Schedule
     }
 }
