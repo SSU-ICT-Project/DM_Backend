@@ -30,9 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -129,26 +127,26 @@ public class MemberServiceImpl implements MemberService {
     // 회원정보 수정
     @Override
     @Transactional
-    public void updateMember(MemberForm memberForm, MultipartFile imageFile, LoginUserDto loginUser) {
-        /// 기존 이미지 삭제 후 입력 받은 이미지 S3에 저장
-        String imageUrl = loginUser.getProfileImageUrl(); // 기본적으로 기존 이미지 URL을 사용
-        if (imageFile != null && !imageFile.isEmpty()) {
-            // 기존 이미지 없으면 바로 새로운 이미지 저장
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                s3Service.deleteFile(imageUrl);
-            }
-            try {
-                imageUrl = s3Service.uploadFile(imageFile, "profile-image");
-            } catch (IOException e) {
-                throw new ServiceException(ReturnCode.INTERNAL_ERROR);
-            }
-        } else {
-            // imageFile이 없으면 기존 이미지가 있다면 삭제한다
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                s3Service.deleteFile(imageUrl); // 기존 이미지 삭제
-            }
-            imageUrl = null;
-        }
+    public void updateMember(MemberForm memberForm, LoginUserDto loginUser) {
+        // 기존 이미지 삭제 후 입력 받은 이미지 S3에 저장
+//        String imageUrl = loginUser.getProfileImageUrl(); // 기본적으로 기존 이미지 URL을 사용
+//        if (imageFile != null && !imageFile.isEmpty()) {
+//            // 기존 이미지 없으면 바로 새로운 이미지 저장
+//            if (imageUrl != null && !imageUrl.isEmpty()) {
+//                s3Service.deleteFile(imageUrl);
+//            }
+//            try {
+//                imageUrl = s3Service.uploadFile(imageFile, "profile-image");
+//            } catch (IOException e) {
+//                throw new ServiceException(ReturnCode.INTERNAL_ERROR);
+//            }
+//        } else {
+//            // imageFile이 없으면 기존 이미지가 있다면 삭제한다
+//            if (imageUrl != null && !imageUrl.isEmpty()) {
+//                s3Service.deleteFile(imageUrl); // 기존 이미지 삭제
+//            }
+//            imageUrl = null;
+//        }
         if (memberForm.getNickname() != null) {
             loginUser.setNickname(memberForm.getNickname());
         }
@@ -182,7 +180,7 @@ public class MemberServiceImpl implements MemberService {
         if (memberForm.getGender() != null) {
             loginUser.setGender(memberForm.getGender());
         }
-        loginUser.setProfileImageUrl(imageUrl);
+//        loginUser.setProfileImageUrl(imageUrl);
         // LoginUserDto를 Member 엔티티로 변환
         Member memberEntity = loginUser.ConvertToMember();
         memberRepository.save(memberEntity);
