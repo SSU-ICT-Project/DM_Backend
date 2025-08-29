@@ -7,6 +7,7 @@ import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.TimeRange;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
+import com.dm.dmbackend.global.common.vo.Location;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class NotProdMemberService {
         List<Member> members = new ArrayList<>();
         for (int i = 0; i < names.size(); i++) {
             int minutes = 10 + (i * 5); // 10,15,20,25,30
+            Location location = buildLocation(names.get(i));
             MemberForm memberForm = MemberForm.builder()
                     .nickname(nicknames.get(i))
                     .job(jobs.get(i))
@@ -48,6 +50,7 @@ public class NotProdMemberService {
                     .birthday(LocalDate.of(2001, i + 1, 1))
                     .averagePreparationTime(LocalTime.of(0, minutes))
                     .distractionAppList(buildDistractionApps(i + 1)) // 1개 → 5개
+                    .location(location)
                     .build();
             memberService.signup(memberForm);
             Member member = memberRepository.findByEmail(memberForm.getEmail())
@@ -70,7 +73,6 @@ public class NotProdMemberService {
         Member admin = memberRepository.findByEmail(adminForm.getEmail())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         members.add(admin);
-
         return members;
     }
 
@@ -105,5 +107,53 @@ public class NotProdMemberService {
         r.setStart(LocalTime.parse(start));
         r.setEnd(LocalTime.parse(end));
         return r;
+    }
+
+    // 지역별 Location 생성
+    private Location buildLocation(String name) {
+        switch (name) {
+            case "서울":
+                return Location.builder()
+                        .placeName("강남역")
+                        .placeAddress("서울특별시 강남구 강남대로 396")
+                        .latitude("37.4979")
+                        .longitude("127.0276")
+                        .build();
+            case "인천":
+                return Location.builder()
+                        .placeName("송도 센트럴파크")
+                        .placeAddress("인천 연수구 컨벤시아대로 160")
+                        .latitude("37.3925")
+                        .longitude("126.6440")
+                        .build();
+            case "강릉":
+                return Location.builder()
+                        .placeName("경포해변")
+                        .placeAddress("강원특별자치도 강릉시 강문동")
+                        .latitude("37.8056")
+                        .longitude("128.9072")
+                        .build();
+            case "부산":
+                return Location.builder()
+                        .placeName("해운대해수욕장")
+                        .placeAddress("부산 해운대구 우동")
+                        .latitude("35.1587")
+                        .longitude("129.1604")
+                        .build();
+            case "제주":
+                return Location.builder()
+                        .placeName("성산일출봉")
+                        .placeAddress("제주 서귀포시 성산읍 성산리")
+                        .latitude("33.4580")
+                        .longitude("126.9410")
+                        .build();
+            default:
+                return Location.builder()
+                        .placeName("기본 장소")
+                        .placeAddress("대한민국")
+                        .latitude("0.0")
+                        .longitude("0.0")
+                        .build();
+        }
     }
 }

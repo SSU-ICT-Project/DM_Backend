@@ -2,6 +2,7 @@ package com.dm.dmbackend.domain.schedule.scheduleMessage.serviceImpl;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
+import com.dm.dmbackend.domain.schedule.scheduleMessage.dto.ScheduleMessageRedisDto;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.entity.ScheduleMessage;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.repository.ScheduleMessageRepository;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.service.ScheduleMessageService;
@@ -37,8 +38,15 @@ public class ScheduleMessageServiceImpl implements ScheduleMessageService {
                 .build();
         scheduleMessageRepository.save(scheduleMessage);
         try {
+            ScheduleMessageRedisDto dto = ScheduleMessageRedisDto.builder()
+                    .id(scheduleMessage.getId())
+                    .scheduleId(schedule.getId())
+                    .memberId(loginUser.getId())
+                    .message(message)
+                    .scheduleTime(scheduleTime)
+                    .build();
             // JSON 직렬화
-            String jsonValue = objectMapper.writeValueAsString(scheduleMessage);
+            String jsonValue = objectMapper.writeValueAsString(dto);
             // Redis ZSET에 저장 (score = epoch milli)
             double score = scheduleTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             redisTemplate.opsForZSet().add(REDIS_KEY, jsonValue, score);
@@ -48,4 +56,3 @@ public class ScheduleMessageServiceImpl implements ScheduleMessageService {
         }
     }
 }
-
