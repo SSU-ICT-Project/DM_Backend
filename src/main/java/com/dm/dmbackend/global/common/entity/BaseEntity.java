@@ -1,4 +1,4 @@
-package com.dm.dmbackend.global.jpa;
+package com.dm.dmbackend.global.common.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

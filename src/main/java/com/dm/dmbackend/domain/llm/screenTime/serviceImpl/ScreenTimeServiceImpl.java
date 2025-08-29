@@ -45,12 +45,13 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                                                          LoginUserDto loginUser) {
         String ragInput = toCureRagPayload(screenTimeCureRequest);
         UserContext ctx = buildUserContext(loginUser);
+        String ragQuery = buildRagQuery(loginUser.getMotivationType()); // 검색 전용 짧은 질의
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
         String cureMessage = cure.message(
-                ctx.getMotivationPrompt(),
                 nvl(ragInput),
                 nvl(ctx.getGoalSummary()),
-                ctx.getUserData()
+                ctx.getUserData(),
+                ragQuery
         );
         cureMessage = cureMessage.replaceAll("\\s*\\n\\s*", " ");
         // DB 저장
@@ -61,7 +62,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .messageType(ScreenTime.MessageType.CURE)
                 .build();
         screenTimeRepository.save(screenTime);
-        // 중독 치료 메시지 이벤트 생성
+        // 중독 치료 메시지 알림 생성
         Notification notification = Notification.builder()
                 .senderId(loginUser.getId())
                 .senderNickname(loginUser.getNickname())
@@ -69,9 +70,10 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .receiverId(loginUser.getId())
                 .objectId(screenTime.getId())
                 .content(cureMessage)
-                .targetObject(Notification.TargetObject.Cure)
+                .targetObject(Notification.TargetObject.CURE)
                 .build();
         NotificationValidator.validateNotification(loginUser);
+        // 중독 치료 메시지 이벤트 생성
         try {
             String message = objectMapper.writeValueAsString(notification);
             kafkaTemplate.send("cure-topic", message);
@@ -102,7 +104,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .messageType(ScreenTime.MessageType.MOTIVATE)
                 .build();
         screenTimeRepository.save(screenTime);
-        // 동기부여 메시지 이벤트 생성
+        // 동기부여 메시지 알림 생성
         Notification notification = Notification.builder()
                 .senderId(loginUser.getId())
                 .senderNickname(loginUser.getNickname())
@@ -110,9 +112,10 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
                 .receiverId(loginUser.getId())
                 .objectId(screenTime.getId())
                 .content(motivateMessage)
-                .targetObject(Notification.TargetObject.Motivate)
+                .targetObject(Notification.TargetObject.MOTIVATE)
                 .build();
         NotificationValidator.validateNotification(loginUser);
+        // 동기부여 메시지 이벤트 생성
         try {
             String message = objectMapper.writeValueAsString(notification);
             kafkaTemplate.send("motivate-topic", message);
@@ -155,7 +158,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         String userData = String.format("나이: %d, 성별: %s, 직업: %s",
                 age, nvl(loginUser.getGender()), nvl(loginUser.getJob()));
 
-        // RAG용 목표 요약 (상위 3개)
+        // 프롬프트용 목표 요약 (상위 3개)
         String goalSummary = mainGoalService.buildCompactGoalSummary(loginUser, 3);
         return new UserContext(motivationPrompt, userData, goalSummary);
     }
@@ -189,5 +192,31 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Failed to build RAG payload", e);
         }
+    }
+
+    public String buildRagQuery(Member.MotivationType type) {
+        LinkedHashSet<String> terms = new LinkedHashSet<>();
+        // 1) 공통 도메인
+        terms.add("디지털 중독 치료");
+        // 2) 성향에 따라 우선 문서축을 선택적으로 강화
+        switch (type) {
+            case HABITUAL_WATCHER -> {
+                terms.addAll(List.of("스마트폰 중독 예방", "인지행동 집단치료"));
+                terms.addAll(List.of("자기점검", "점진적 사용 감소", "습관 교체"));
+            }
+            case COMFORT_SEEKER -> {
+                terms.addAll(List.of("인지행동치료", "인지행동 음악치료", "중독음악치료"));
+                terms.addAll(List.of("정서 조절", "스트레스", "음악치료"));
+            }
+            case THRILL_SEEKER -> {
+                terms.addAll(List.of("디지털 치료제", "saMD", "의료 목적의 소프트웨어"));
+                terms.addAll(List.of("스마트폰 중독 예방", "인지행동 집단치료"));
+                terms.addAll(List.of("대체 활동", "동기 강화 상담"));
+            }
+        }
+        // 4) 너무 길어지면 상위 8~10개만 유지 (순서 보존)
+        return terms.stream()
+                .limit(10)
+                .collect(java.util.stream.Collectors.joining(" "));
     }
 }

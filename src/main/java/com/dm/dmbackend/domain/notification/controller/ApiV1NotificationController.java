@@ -27,8 +27,8 @@ public class ApiV1NotificationController {
     // 알림 목록 조회
     @GetMapping
     @Operation(summary = "알림 목록 조회")
-    public ApiResponse<NotificationDto> getNotifications(@ModelAttribute NotificationPage request, @LoginUser LoginUserDto loginUser) {
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+    public ApiResponse<NotificationDto> getNotifications(@ModelAttribute NotificationPage notificationPage, @LoginUser LoginUserDto loginUser) {
+        Pageable pageable = PageRequest.of(notificationPage.getPage(), notificationPage.getSize());
         return ApiResponse.of(DMPage.of(notificationService.getNotifications(pageable, loginUser)));
     }
 

@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.account.member.entity;
 
-import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.dm.dmbackend.global.common.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

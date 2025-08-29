@@ -79,7 +79,7 @@ public class LlmConfig {
                 .build();
     }
 
-    // 자동 RAG: {{information}} 채워 넣는 augmentor
+    // 자동 RAG 채워 넣는 augmentor
     @Bean
     public RetrievalAugmentor screenTimeAugmentor(EmbeddingStoreContentRetriever retriever) {
         return DefaultRetrievalAugmentor.builder()

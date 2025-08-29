@@ -89,6 +89,7 @@ public class MemberServiceImpl implements MemberService {
                 .birthday(memberForm.getBirthday())
                 .averagePreparationTime(memberForm.getAveragePreparationTime())
                 .distractionAppList(memberForm.getDistractionAppList())
+                .location(memberForm.getLocation())
                 .build();
         memberRepository.save(member);
     }
@@ -169,6 +170,9 @@ public class MemberServiceImpl implements MemberService {
         if (memberForm.getDistractionAppList() != null) {
             loginUser.setDistractionAppList(memberForm.getDistractionAppList());
         }
+        if (memberForm.getLocation() != null) {
+            loginUser.setLocation(memberForm.getLocation());
+        }
         if (memberForm.getUseNotification() != null) {
             loginUser.setUseNotification(memberForm.getUseNotification());
         }
@@ -238,7 +242,7 @@ public class MemberServiceImpl implements MemberService {
                 .receiverId(followRec.getId())
                 .objectId(memberFollowReq.getId())
                 .content("님이 팔로우를 요청하였습니다.")
-                .targetObject(Notification.TargetObject.Follow)
+                .targetObject(Notification.TargetObject.FOLLOW)
                 .build();
         try {
             String message = objectMapper.writeValueAsString(notification);
@@ -283,7 +287,7 @@ public class MemberServiceImpl implements MemberService {
                 .receiverId(memberId)
                 .objectId(memberFollow.getId())
                 .content("님이 팔로우 요청을 수락하였습니다.")
-                .targetObject(Notification.TargetObject.Follow)
+                .targetObject(Notification.TargetObject.FOLLOW)
                 .build();
         try {
             String message = objectMapper.writeValueAsString(notification);
@@ -375,6 +379,7 @@ public class MemberServiceImpl implements MemberService {
                 .birthday(loginUser.getBirthday())
                 .averagePreparationTime(loginUser.getAveragePreparationTime())
                 .distractionAppList(loginUser.getDistractionAppList())
+                .location(loginUser.getLocation())
                 .useNotification(loginUser.getUseNotification())
                 .motivationType(loginUser.getMotivationType())
                 .gender(loginUser.getGender())
@@ -440,6 +445,7 @@ public class MemberServiceImpl implements MemberService {
                 .birthday(member.getBirthday())
                 .averagePreparationTime(member.getAveragePreparationTime())
                 .distractionAppList(member.getDistractionAppList())
+                .location(member.getLocation())
                 .useNotification(member.getUseNotification())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())

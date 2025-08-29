@@ -1,7 +1,7 @@
 package com.dm.dmbackend.domain.goal.mainGoal.entity;
 
 import com.dm.dmbackend.domain.account.member.entity.Member;
-import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.dm.dmbackend.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

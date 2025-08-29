@@ -1,16 +1,13 @@
-package com.dm.dmbackend.domain.schedule.entity;
+package com.dm.dmbackend.domain.schedule.schedule.entity;
 
 import com.dm.dmbackend.domain.account.member.entity.Member;
-import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.dm.dmbackend.global.common.entity.BaseEntity;
+import com.dm.dmbackend.global.common.vo.Location;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
-
 
 @Entity
 @Getter
@@ -19,7 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Schedule extends BaseEntity {
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -31,8 +27,8 @@ public class Schedule extends BaseEntity {
 
     private LocalDateTime scheduleEndTime;
 
-    @Column(length = 50)
-    private String location;
+    @Embedded
+    private Location location;
 
     @Column(length = 200)
     private String memo;
@@ -41,4 +37,6 @@ public class Schedule extends BaseEntity {
 
     private boolean autoTimeCheck;
 
+    @Builder.Default
+    private boolean notified = false;
 }
