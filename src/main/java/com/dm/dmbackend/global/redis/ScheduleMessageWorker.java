@@ -1,7 +1,11 @@
 package com.dm.dmbackend.global.redis;
 
+import com.dm.dmbackend.domain.account.member.entity.Member;
+import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.notification.entity.Notification;
-import com.dm.dmbackend.domain.schedule.scheduleMessage.entity.ScheduleMessage;
+import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
+import com.dm.dmbackend.domain.schedule.schedule.repository.ScheduleRepository;
+import com.dm.dmbackend.domain.schedule.scheduleMessage.dto.ScheduleMessageRedisDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +21,14 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class ScheduleMessageWorker {
+    private final ScheduleRepository scheduleRepository;
+    private final MemberRepository memberRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private static final String REDIS_KEY = "schedule:messages";
 
-    // 1분마다 실행 (window = 1분)
+    // 1분마다 실행
     @Scheduled(cron = "0 * * * * *")
     public void processDueMessages() {
         long now = Instant.now().toEpochMilli();
@@ -37,23 +43,27 @@ public class ScheduleMessageWorker {
         for (Object msgObj : dueMessages) {
             try {
                 String json = (String) msgObj;
-                ScheduleMessage scheduleMessage = objectMapper.readValue(json, ScheduleMessage.class);
-                // Kafka로 전송
+                ScheduleMessageRedisDto dto = objectMapper.readValue(json, ScheduleMessageRedisDto.class);
+                Schedule schedule = scheduleRepository.findById(dto.getScheduleId()).orElseThrow();
+                Member member = memberRepository.findById(dto.getMemberId()).orElseThrow();
+                // 일정 알림 생성 완료
                 Notification notification = Notification.builder()
-                        .senderId(scheduleMessage.getMember().getId())
-                        .senderNickname(scheduleMessage.getMember().getNickname())
-                        .senderProfileUrl(scheduleMessage.getMember().getProfileImageUrl())
-                        .receiverId(scheduleMessage.getMember().getId())
-                        .objectId(scheduleMessage.getId())
-                        .content(scheduleMessage.getMessage())
+                        .senderId(member.getId())
+                        .senderNickname(member.getNickname())
+                        .senderProfileUrl(member.getProfileImageUrl())
+                        .receiverId(member.getId())
+                        .objectId(dto.getId())
+                        .content(dto.getMessage())
                         .targetObject(Notification.TargetObject.SCHEDULE)
                         .build();
+                schedule.setNotified(true);
+                scheduleRepository.save(schedule);
+                // 일정 알림 이벤트 생성 완료
                 String kafkaMessage = objectMapper.writeValueAsString(notification);
                 kafkaTemplate.send("schedule-topic", kafkaMessage);
-
                 // 발송 완료된 메시지는 Redis에서 제거
                 redisTemplate.opsForZSet().remove(REDIS_KEY, json);
-                log.info("Sent scheduled message to Kafka. scheduleId={}", scheduleMessage.getId());
+                log.info("Sent scheduled message to Kafka. scheduleId={}", dto.getId());
             } catch (Exception e) {
                 log.error("Failed to process scheduled message: {}", e.getMessage());
             }

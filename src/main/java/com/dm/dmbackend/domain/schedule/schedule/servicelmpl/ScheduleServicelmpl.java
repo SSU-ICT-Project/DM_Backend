@@ -3,6 +3,8 @@ package com.dm.dmbackend.domain.schedule.schedule.servicelmpl;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
+import com.dm.dmbackend.domain.schedule.schedule.dto.external.req.ScheduleMessageRequest;
+import com.dm.dmbackend.domain.schedule.schedule.dto.external.res.ScheduleMessageResponse;
 import com.dm.dmbackend.domain.schedule.schedule.dto.req.ScheduleRequest;
 import com.dm.dmbackend.domain.schedule.schedule.dto.res.ScheduleResponse;
 import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
@@ -18,10 +20,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -30,6 +36,7 @@ public class ScheduleServicelmpl implements ScheduleService {
     private final ScheduleMessageService scheduleMessageService;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
+    private final RestTemplate restTemplate;
 
     // 일정 생성
     @Override
@@ -47,20 +54,27 @@ public class ScheduleServicelmpl implements ScheduleService {
                 .build();
         scheduleRepository.save(schedule);
 
-        // 자동시간계산 설정한 경우에만 예약 생성
+        // 자동시간계산 설정한 경우에만 일정 알림 예약 생성
         if (schedule.isAutoTimeCheck()){
             // 일정 알림 메시지 생성 요청
-            String message = "";
-
-            LocalDateTime scheduleTime = null;
-
-            // 일정 알림 예약 생성
-            scheduleMessageService.createScheduleMessage(schedule, message, scheduleTime, loginUser);
+            String url = "https://api.langgraph.letzgo.site/recommend";
+            ScheduleMessageRequest req = convertToScheduleMessageRequest(schedule, loginUser);
+            // POST 요청 보내기
+            ScheduleMessageResponse res = restTemplate.postForObject(url, req, ScheduleMessageResponse.class);
+            String message = res.getRecommendation();
+            // 이동 시간 파싱
+            Duration travelDuration = parseDurationFromMessage(message);
+            // 메시지에서 [이동 시간: HH:MM] 제거
+            String cleanedMessage = removeTravelDurationTag(message);
+            // 기준 scheduleTime (출발 시간)
+            LocalDateTime baseTime = schedule.getScheduleStartTime().minus(travelDuration);
+            // 출발 1시간 전
+            LocalDateTime scheduleTime1 = baseTime.minusHours(1);
+            scheduleMessageService.createScheduleMessage(schedule, cleanedMessage, scheduleTime1, loginUser);
+            // 출발 30분 전
+            LocalDateTime scheduleTime2 = baseTime.minusMinutes(30);
+            scheduleMessageService.createScheduleMessage(schedule, cleanedMessage, scheduleTime2, loginUser);
         }
-
-        // 일정 알림 예약 생성 완료
-        schedule.setNotified(true);
-        scheduleRepository.save(schedule);
     }
 
     // 일정 상세 조회
@@ -174,4 +188,34 @@ public class ScheduleServicelmpl implements ScheduleService {
                 .autoTimeCheck(schedule.isAutoTimeCheck())
                 .build();
     }
+
+    // Schedule를 ScheduleMessageRequest로 변환
+    private ScheduleMessageRequest convertToScheduleMessageRequest(Schedule schedule, LoginUserDto loginUser) {
+        return ScheduleMessageRequest.builder()
+                .scheduleName(schedule.getScheduleName())
+                .scheduleStartTime(schedule.getScheduleStartTime())
+                .scheduleEndTime(schedule.getScheduleEndTime())
+                .DepartureLocation(loginUser.getLocation())
+                .ArrivalLocation(schedule.getLocation())
+                .build();
+    }
+
+    // message에서 총 소요시간 추출
+    private Duration parseDurationFromMessage(String message) {
+        // 정규식: "[이동 시간: HH:MM]" 형태 추출 (뒤에 공백/개행 허용)
+        Pattern pattern = Pattern.compile("\\[이동 시간:\\s*(\\d{2}):(\\d{2})]\\s*$");
+        Matcher matcher = pattern.matcher(message.trim());
+        if (matcher.find()) {
+            int hours = Integer.parseInt(matcher.group(1));
+            int minutes = Integer.parseInt(matcher.group(2));
+            return Duration.ofHours(hours).plusMinutes(minutes);
+        }
+        return Duration.ZERO; // 못 찾으면 0분
+    }
+
+    // message에서 [이동 시간: HH:MM] 꼬리표 제거
+    private String removeTravelDurationTag(String message) {
+        return message.replaceAll("\\s*\\[이동 시간:\\s*\\d{2}:\\d{2}]\\s*$", "").trim();
+    }
+
 }
