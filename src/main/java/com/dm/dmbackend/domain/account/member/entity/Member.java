@@ -1,6 +1,7 @@
 package com.dm.dmbackend.domain.account.member.entity;
 
-import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.dm.dmbackend.global.common.entity.BaseEntity;
+import com.dm.dmbackend.global.common.vo.Location;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,6 +47,9 @@ public class Member extends BaseEntity {
     @Column(columnDefinition = "jsonb")
     @Type(JsonType.class)
     private List<String> distractionAppList;
+
+    @Embedded
+    private Location location;
 
     @Builder.Default
     private Boolean useNotification = true;

@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.notification.entity;
 
-import com.dm.dmbackend.global.jpa.BaseEntity;
+import com.dm.dmbackend.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +32,6 @@ public class Notification extends BaseEntity {
     @Column(length = 10)
     private TargetObject targetObject;
     public enum TargetObject {
-        Comment, Follow, Post, Motivate, Cure
+        COMMENT, FOLLOW, POST, MOTIVATE, CURE, SCHEDULE
     }
 }

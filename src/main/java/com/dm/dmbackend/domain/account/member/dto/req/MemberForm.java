@@ -1,6 +1,7 @@
 package com.dm.dmbackend.domain.account.member.dto.req;
 
 import com.dm.dmbackend.domain.account.member.entity.Member;
+import com.dm.dmbackend.global.common.vo.Location;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class MemberForm {
     private LocalDate birthday;
     private LocalTime averagePreparationTime;
     private List<String> distractionAppList;
+    private Location location;
     private Boolean useNotification;
     private Member.MotivationType motivationType;
     private Member.Gender gender;

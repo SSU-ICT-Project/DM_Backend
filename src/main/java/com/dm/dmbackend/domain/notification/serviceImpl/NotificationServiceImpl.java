@@ -54,6 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
+    // ----------------- 헬퍼 메서드 -----------------
+
     // 요청 페이지 수 제한
     private void checkPageSize(int pageSize) {
         int maxPageSize = MemberPage.getMaxPageSize();

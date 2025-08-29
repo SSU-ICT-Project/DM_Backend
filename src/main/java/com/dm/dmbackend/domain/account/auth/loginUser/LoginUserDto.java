@@ -3,6 +3,7 @@ package com.dm.dmbackend.domain.account.auth.loginUser;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollow;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollowReq;
+import com.dm.dmbackend.global.common.vo.Location;
 import lombok.Builder;
 import lombok.Data;
 
@@ -26,6 +27,7 @@ public class LoginUserDto {
     private LocalDate birthday;
     private LocalTime averagePreparationTime;
     private List<String> distractionAppList;
+    private Location location;
     private Boolean useNotification;
     private Member.State state;
     private Member.MemberRole role;
@@ -49,6 +51,7 @@ public class LoginUserDto {
                 .birthday(member.getBirthday())
                 .averagePreparationTime(member.getAveragePreparationTime())
                 .distractionAppList(member.getDistractionAppList())
+                .location(member.getLocation())
                 .useNotification(member.getUseNotification())
                 .motivationType(member.getMotivationType())
                 .gender(member.getGender())
@@ -76,6 +79,7 @@ public class LoginUserDto {
                 .birthday(this.birthday)
                 .averagePreparationTime(this.averagePreparationTime)
                 .distractionAppList(this.distractionAppList)
+                .location(this.location)
                 .useNotification(this.useNotification)
                 .motivationType(this.motivationType)
                 .gender(this.gender)
