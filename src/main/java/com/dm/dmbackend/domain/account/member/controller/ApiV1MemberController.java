@@ -65,10 +65,8 @@ public class ApiV1MemberController {
     // 회원정보 수정
     @PutMapping
     @Operation(summary = "회원정보 수정")
-    public ApiResponse<String> updateMemberInfo(@RequestPart(value = "memberForm") @Valid MemberForm memberForm,
-                                                @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
-                                                @LoginUser LoginUserDto loginUser) {
-        memberService.updateMember(memberForm, imageFile, loginUser);
+    public ApiResponse<String> updateMemberInfo(@RequestBody @Valid MemberForm memberForm, @LoginUser LoginUserDto loginUser) {
+        memberService.updateMember(memberForm, loginUser);
         return ApiResponse.of(ReturnCode.SUCCESS);
     }
 

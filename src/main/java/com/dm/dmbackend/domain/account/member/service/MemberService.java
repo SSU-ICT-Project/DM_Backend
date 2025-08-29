@@ -7,7 +7,6 @@ import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberDto;
 import com.dm.dmbackend.domain.account.member.dto.res.MemberDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
     // 회원가입 [가데이터/초기관리자 생성]
@@ -29,7 +28,7 @@ public interface MemberService {
     DetailMemberDto getDetailMemberInfo(Long memberId);
 
     // 회원정보 수정
-    void updateMember(MemberForm memberForm, MultipartFile imageFile, LoginUserDto loginUser);
+    void updateMember(MemberForm memberForm, LoginUserDto loginUser);
 
     // 회원탈퇴
     void deleteMember(LoginUserDto loginUser);
