@@ -200,15 +200,15 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
         terms.add("디지털 중독 치료");
         // 2) 성향에 따라 우선 문서축을 선택적으로 강화
         switch (type) {
-            case HABITUAL_WATCHER -> {
+            case HABITUAL_WATCHER -> {  // 습관적 시청형
                 terms.addAll(List.of("스마트폰 중독 예방", "인지행동 집단치료"));
                 terms.addAll(List.of("자기점검", "점진적 사용 감소", "습관 교체"));
             }
-            case COMFORT_SEEKER -> {
+            case COMFORT_SEEKER -> {    // 위로 추구형
                 terms.addAll(List.of("인지행동치료", "인지행동 음악치료", "중독음악치료"));
                 terms.addAll(List.of("정서 조절", "스트레스", "음악치료"));
             }
-            case THRILL_SEEKER -> {
+            case THRILL_SEEKER -> {     // 자극 추구형
                 terms.addAll(List.of("디지털 치료제", "saMD", "의료 목적의 소프트웨어"));
                 terms.addAll(List.of("스마트폰 중독 예방", "인지행동 집단치료"));
                 terms.addAll(List.of("대체 활동", "동기 강화 상담"));

@@ -80,7 +80,8 @@ public class IngestServiceImpl implements IngestService {
 
     // 논문PDF 임베딩
     private void ingestFromPdf(Path pdfPath) {
-        DocumentSplitter splitter = DocumentSplitters.recursive(600, 100);
+        DocumentSplitter splitter = DocumentSplitters
+                .recursive(600, 100);
         var ingestor = EmbeddingStoreIngestor.builder()
                 .embeddingModel(embeddingModel)
                 .embeddingStore(embeddingStore)

@@ -4,7 +4,6 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.dto.req.AdminForm;
 import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
 import com.dm.dmbackend.domain.account.member.entity.Member;
-import com.dm.dmbackend.domain.account.member.entity.TimeRange;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.global.common.vo.Location;
@@ -99,14 +98,6 @@ public class NotProdMemberService {
         List<String> base = List.of("YouTube", "Instagram", "Facebook", "TikTok", "Thread");
         count = Math.max(1, Math.min(count, base.size()));
         return new ArrayList<>(base.subList(0, count));
-    }
-
-    // TimeRange 생성 유틸 (프로퍼티/생성자 다르면 여기를 맞춰 수정)
-    private static TimeRange tr(String start, String end) {
-        TimeRange r = new TimeRange();
-        r.setStart(LocalTime.parse(start));
-        r.setEnd(LocalTime.parse(end));
-        return r;
     }
 
     // 지역별 Location 생성
