@@ -1,11 +1,9 @@
-package com.dm.dmbackend.domain.account.member.dto.req;
+package com.dm.dmbackend.domain.account.member.dto.res;
 
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.global.common.vo.Location;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,13 +11,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class MemberForm {
+public class DetailMemberResponse {
+    private Long id;
+    private String name;
     private String nickname;
     private String job;
+    private String phone;
     private String email;
-    private String password;
     private LocalDate birthday;
     private LocalTime averagePreparationTime;
     private List<String> distractionAppList;
@@ -27,4 +25,11 @@ public class MemberForm {
     private Boolean useNotification;
     private Member.MotivationType motivationType;
     private Member.Gender gender;
+    private String profileImageUrl;
+    private Long followMemberCount;
+    private Long followedMemberCount;
+    private List<SimpleMemberDto> followList;
+    private List<SimpleMemberDto> followedList;
+    private List<SimpleMemberDto> followReqList;
+    private List<SimpleMemberDto> followRecList;
 }

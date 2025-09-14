@@ -2,11 +2,11 @@ package com.dm.dmbackend.domain.account.member.serviceImpl;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.auth.service.AuthService;
-import com.dm.dmbackend.domain.account.member.dto.req.AdminForm;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
-import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberDto;
-import com.dm.dmbackend.domain.account.member.dto.res.MemberDto;
-import com.dm.dmbackend.domain.account.member.dto.res.SimpleMember;
+import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
+import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
+import com.dm.dmbackend.domain.account.member.dto.res.SimpleMemberDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollow;
 import com.dm.dmbackend.domain.account.member.entity.MemberFollowReq;
@@ -49,21 +49,21 @@ public class MemberServiceImpl implements MemberService {
     // 회원가입 [가데이터/초기관리자 생성]
     @Override
     @Transactional
-    public void adminSignup(AdminForm adminForm) {
-        if (memberRepository.existsByEmail((adminForm.getEmail()))) {
+    public void adminSignup(AdminSignUpRequest adminSignUpRequest) {
+        if (memberRepository.existsByEmail((adminSignUpRequest.getEmail()))) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
         // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
-        String encodedPassword = adminForm.getPassword() != null ? passwordEncoder.encode(adminForm.getPassword()) : null;
+        String encodedPassword = adminSignUpRequest.getPassword() != null ? passwordEncoder.encode(adminSignUpRequest.getPassword()) : null;
         Member member = Member.builder()
-                .nickname(adminForm.getNickname())
-                .job(adminForm.getJob())
-                .email(adminForm.getEmail())
+                .nickname(adminSignUpRequest.getNickname())
+                .job(adminSignUpRequest.getJob())
+                .email(adminSignUpRequest.getEmail())
                 .password(encodedPassword)
-                .motivationType(adminForm.getMotivationType())
-                .gender(adminForm.getGender())
-                .role(adminForm.getMemberRole())
-                .birthday(adminForm.getBirthday())
+                .motivationType(adminSignUpRequest.getMotivationType())
+                .gender(adminSignUpRequest.getGender())
+                .role(adminSignUpRequest.getMemberRole())
+                .birthday(adminSignUpRequest.getBirthday())
                 .build();
         memberRepository.save(member);
     }
@@ -71,23 +71,23 @@ public class MemberServiceImpl implements MemberService {
     // 회원가입
     @Override
     @Transactional
-    public void signup(MemberForm memberForm) {
-        if (memberRepository.existsByEmail((memberForm.getEmail()))) {
+    public void signup(MemberSignUpRequest memberSignUpRequest) {
+        if (memberRepository.existsByEmail((memberSignUpRequest.getEmail()))) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
         // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
-        String encodedPassword = memberForm.getPassword() != null ? passwordEncoder.encode(memberForm.getPassword()) : null;
+        String encodedPassword = memberSignUpRequest.getPassword() != null ? passwordEncoder.encode(memberSignUpRequest.getPassword()) : null;
         Member member = Member.builder()
-                .nickname(memberForm.getNickname())
-                .job(memberForm.getJob())
-                .email(memberForm.getEmail())
+                .nickname(memberSignUpRequest.getNickname())
+                .job(memberSignUpRequest.getJob())
+                .email(memberSignUpRequest.getEmail())
                 .password(encodedPassword)  // 인코딩된 비밀번호 저장
-                .motivationType(memberForm.getMotivationType())
-                .gender(memberForm.getGender())
-                .birthday(memberForm.getBirthday())
-                .averagePreparationTime(memberForm.getAveragePreparationTime())
-                .distractionAppList(memberForm.getDistractionAppList())
-                .location(memberForm.getLocation())
+                .motivationType(memberSignUpRequest.getMotivationType())
+                .gender(memberSignUpRequest.getGender())
+                .birthday(memberSignUpRequest.getBirthday())
+                .averagePreparationTime(memberSignUpRequest.getAveragePreparationTime())
+                .distractionAppList(memberSignUpRequest.getDistractionAppList())
+                .location(memberSignUpRequest.getLocation())
                 .build();
         memberRepository.save(member);
     }
@@ -95,21 +95,21 @@ public class MemberServiceImpl implements MemberService {
     // 본인 회원정보 조회
     @Override
     @Transactional
-    public MemberDto getMyInfo(LoginUserDto loginUser) {
+    public MemberResponse getMyInfo(LoginUserDto loginUser) {
         return loginUserConvertToMemberInfo(loginUser);
     }
 
     // 본인 상세회원정보 조회
     @Override
     @Transactional
-    public DetailMemberDto getMyDetailInfo(LoginUserDto loginUser){
+    public DetailMemberResponse getMyDetailInfo(LoginUserDto loginUser){
         return loginUserConvertToDetailMemberInfo(loginUser);
     }
 
     // 다른 멤버의 회원정보 조회
     @Override
     @Transactional
-    public MemberDto getMemberInfo(Long memberId) {
+    public MemberResponse getMemberInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         return memberConvertToMemberInfo(member);
@@ -118,7 +118,7 @@ public class MemberServiceImpl implements MemberService {
     // 다른 멤버의 상세회원정보 조회
     @Override
     @Transactional
-    public DetailMemberDto getDetailMemberInfo(Long memberId){
+    public DetailMemberResponse getDetailMemberInfo(Long memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         return memberConvertToDetailMemberInfo(member);
@@ -127,7 +127,7 @@ public class MemberServiceImpl implements MemberService {
     // 회원정보 수정
     @Override
     @Transactional
-    public void updateMember(MemberForm memberForm, LoginUserDto loginUser) {
+    public void updateMember(MemberSignUpRequest memberSignUpRequest, LoginUserDto loginUser) {
         // 기존 이미지 삭제 후 입력 받은 이미지 S3에 저장
 //        String imageUrl = loginUser.getProfileImageUrl(); // 기본적으로 기존 이미지 URL을 사용
 //        if (imageFile != null && !imageFile.isEmpty()) {
@@ -147,38 +147,38 @@ public class MemberServiceImpl implements MemberService {
 //            }
 //            imageUrl = null;
 //        }
-        if (memberForm.getNickname() != null) {
-            loginUser.setNickname(memberForm.getNickname());
+        if (memberSignUpRequest.getNickname() != null) {
+            loginUser.setNickname(memberSignUpRequest.getNickname());
         }
-        if (memberForm.getJob() != null) {
-            loginUser.setJob(memberForm.getJob());
+        if (memberSignUpRequest.getJob() != null) {
+            loginUser.setJob(memberSignUpRequest.getJob());
         }
-        if (memberForm.getEmail() != null) {
-            loginUser.setEmail(memberForm.getEmail());
+        if (memberSignUpRequest.getEmail() != null) {
+            loginUser.setEmail(memberSignUpRequest.getEmail());
         }
-        if (memberForm.getPassword() != null && !memberForm.getPassword().isEmpty()) {
-            loginUser.setPassword(BCrypt.hashpw(memberForm.getPassword(), BCrypt.gensalt()));
+        if (memberSignUpRequest.getPassword() != null && !memberSignUpRequest.getPassword().isEmpty()) {
+            loginUser.setPassword(BCrypt.hashpw(memberSignUpRequest.getPassword(), BCrypt.gensalt()));
         }
-        if (memberForm.getBirthday() != null) {
-            loginUser.setBirthday(memberForm.getBirthday());
+        if (memberSignUpRequest.getBirthday() != null) {
+            loginUser.setBirthday(memberSignUpRequest.getBirthday());
         }
-        if (memberForm.getAveragePreparationTime() != null) {
-            loginUser.setAveragePreparationTime(memberForm.getAveragePreparationTime());
+        if (memberSignUpRequest.getAveragePreparationTime() != null) {
+            loginUser.setAveragePreparationTime(memberSignUpRequest.getAveragePreparationTime());
         }
-        if (memberForm.getDistractionAppList() != null) {
-            loginUser.setDistractionAppList(memberForm.getDistractionAppList());
+        if (memberSignUpRequest.getDistractionAppList() != null) {
+            loginUser.setDistractionAppList(memberSignUpRequest.getDistractionAppList());
         }
-        if (memberForm.getLocation() != null) {
-            loginUser.setLocation(memberForm.getLocation());
+        if (memberSignUpRequest.getLocation() != null) {
+            loginUser.setLocation(memberSignUpRequest.getLocation());
         }
-        if (memberForm.getUseNotification() != null) {
-            loginUser.setUseNotification(memberForm.getUseNotification());
+        if (memberSignUpRequest.getUseNotification() != null) {
+            loginUser.setUseNotification(memberSignUpRequest.getUseNotification());
         }
-        if (memberForm.getMotivationType() != null) {
-            loginUser.setMotivationType(memberForm.getMotivationType());
+        if (memberSignUpRequest.getMotivationType() != null) {
+            loginUser.setMotivationType(memberSignUpRequest.getMotivationType());
         }
-        if (memberForm.getGender() != null) {
-            loginUser.setGender(memberForm.getGender());
+        if (memberSignUpRequest.getGender() != null) {
+            loginUser.setGender(memberSignUpRequest.getGender());
         }
 //        loginUser.setProfileImageUrl(imageUrl);
         // LoginUserDto를 Member 엔티티로 변환
@@ -204,7 +204,7 @@ public class MemberServiceImpl implements MemberService {
     // 회원 검색하기
     @Override
     @Transactional
-    public Page<MemberDto> searchMemberInfo(Pageable pageable, String keyword){
+    public Page<MemberResponse> searchMemberInfo(Pageable pageable, String keyword){
         checkPageSize(pageable.getPageSize());
         Page<Member> members = memberRepository.findByKeyword(pageable, keyword);
         return members.map(this::memberConvertToMemberInfo);
@@ -342,8 +342,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // LoginUser를 MemberDto로 변환
-    private MemberDto loginUserConvertToMemberInfo(LoginUserDto loginUser) {
-        return MemberDto.builder()
+    private MemberResponse loginUserConvertToMemberInfo(LoginUserDto loginUser) {
+        return MemberResponse.builder()
                 .id(loginUser.getId())
                 .name(loginUser.getName())
                 .nickname(loginUser.getNickname())
@@ -354,8 +354,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // Member를 MemberDto로 변환
-    private MemberDto memberConvertToMemberInfo(Member member) {
-        return MemberDto.builder()
+    private MemberResponse memberConvertToMemberInfo(Member member) {
+        return MemberResponse.builder()
                 .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
@@ -366,8 +366,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // LoginUser를 DetailMemberDto로 변환
-    private DetailMemberDto loginUserConvertToDetailMemberInfo(LoginUserDto loginUser) {
-        return DetailMemberDto.builder()
+    private DetailMemberResponse loginUserConvertToDetailMemberInfo(LoginUserDto loginUser) {
+        return DetailMemberResponse.builder()
                 .id(loginUser.getId())
                 .name(loginUser.getName())
                 .nickname(loginUser.getNickname())
@@ -386,7 +386,7 @@ public class MemberServiceImpl implements MemberService {
                 .followedMemberCount(loginUser.getFollowedList().stream().count())
                 // 팔로우 목록 변환
                 .followList(loginUser.getFollowList().stream()
-                        .map(MemberFollow -> SimpleMember.builder()
+                        .map(MemberFollow -> SimpleMemberDto.builder()
                                 .userId(MemberFollow.getFollowed().getId())
                                 .userName(MemberFollow.getFollowed().getName())
                                 .userNickname(MemberFollow.getFollowed().getNickname())
@@ -397,7 +397,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로워 목록 변환
                 .followedList(loginUser.getFollowedList().stream()
-                        .map(MemberFollow -> SimpleMember.builder()
+                        .map(MemberFollow -> SimpleMemberDto.builder()
                                 .userId(MemberFollow.getFollow().getId())
                                 .userName(MemberFollow.getFollow().getName())
                                 .userNickname(MemberFollow.getFollow().getNickname())
@@ -408,7 +408,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로우 요청 목록 변환 (현재 사용자가 요청한 팔로우)
                 .followReqList(loginUser.getFollowReqList().stream()
-                        .map(MemberFollowReq -> SimpleMember.builder()
+                        .map(MemberFollowReq -> SimpleMemberDto.builder()
                                 .userId(MemberFollowReq.getFollowRec().getId())
                                 .userName(MemberFollowReq.getFollowRec().getName())
                                 .userNickname(MemberFollowReq.getFollowRec().getNickname())
@@ -419,7 +419,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로우 받은 목록 변환 (다른 사용자가 요청한 팔로우)
                 .followRecList(loginUser.getFollowRecList().stream()
-                        .map(MemberFollowReq -> SimpleMember.builder()
+                        .map(MemberFollowReq -> SimpleMemberDto.builder()
                                 .userId(MemberFollowReq.getFollowReq().getId())
                                 .userName(MemberFollowReq.getFollowReq().getName())
                                 .userNickname(MemberFollowReq.getFollowReq().getNickname())
@@ -432,8 +432,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // Member를 DetailMemberDto로 변환
-    private DetailMemberDto memberConvertToDetailMemberInfo(Member member) {
-        return DetailMemberDto.builder()
+    private DetailMemberResponse memberConvertToDetailMemberInfo(Member member) {
+        return DetailMemberResponse.builder()
                 .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
@@ -452,7 +452,7 @@ public class MemberServiceImpl implements MemberService {
                 .followedMemberCount(member.getFollowedList().stream().count())
                 // 팔로우 목록 변환
                 .followList(member.getFollowList().stream()
-                        .map(MemberFollow -> SimpleMember.builder()
+                        .map(MemberFollow -> SimpleMemberDto.builder()
                                 .userId(MemberFollow.getFollowed().getId())
                                 .userName(MemberFollow.getFollowed().getName())
                                 .userNickname(MemberFollow.getFollowed().getNickname())
@@ -463,7 +463,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로워 목록 변환
                 .followedList(member.getFollowedList().stream()
-                        .map(MemberFollow -> SimpleMember.builder()
+                        .map(MemberFollow -> SimpleMemberDto.builder()
                                 .userId(MemberFollow.getFollow().getId())
                                 .userName(MemberFollow.getFollow().getName())
                                 .userNickname(MemberFollow.getFollow().getNickname())
@@ -474,7 +474,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로우 요청 목록 변환 (현재 사용자가 요청한 팔로우)
                 .followReqList(member.getFollowReqList().stream()
-                        .map(MemberFollowReq -> SimpleMember.builder()
+                        .map(MemberFollowReq -> SimpleMemberDto.builder()
                                 .userId(MemberFollowReq.getFollowRec().getId())
                                 .userName(MemberFollowReq.getFollowRec().getName())
                                 .userNickname(MemberFollowReq.getFollowRec().getNickname())
@@ -485,7 +485,7 @@ public class MemberServiceImpl implements MemberService {
                 )
                 // 팔로우 받은 목록 변환 (다른 사용자가 요청한 팔로우)
                 .followRecList(member.getFollowRecList().stream()
-                        .map(MemberFollowReq -> SimpleMember.builder()
+                        .map(MemberFollowReq -> SimpleMemberDto.builder()
                                 .userId(MemberFollowReq.getFollowReq().getId())
                                 .userName(MemberFollowReq.getFollowReq().getName())
                                 .userNickname(MemberFollowReq.getFollowReq().getNickname())

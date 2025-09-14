@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 @Component
 @ConfigurationProperties(prefix = "oauth2")
-public class OAuth2Properties {
+public class OAuth2AppProperties {
     private Map<String, ProviderProperties> providers;
 
     @Data

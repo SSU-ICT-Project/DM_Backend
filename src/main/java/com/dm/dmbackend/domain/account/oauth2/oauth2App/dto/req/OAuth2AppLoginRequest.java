@@ -6,9 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OAuth2AppLoginRequest {
-    // Google OIDC
-    private String idToken;        // Google: SDK에서 받은 ID Token
+    private String idToken;        // Google(OIDC): SDK에서 받은 ID Token
 
-    // Kakao / Naver
     private String accessToken;    // Kakao/Naver: SDK에서 받은 Access Token
 }

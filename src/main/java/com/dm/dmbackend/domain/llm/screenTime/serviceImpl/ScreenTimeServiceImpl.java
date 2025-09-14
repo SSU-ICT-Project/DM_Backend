@@ -3,7 +3,7 @@ package com.dm.dmbackend.domain.llm.screenTime.serviceImpl;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.goal.mainGoal.service.MainGoalService;
-import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContext;
+import com.dm.dmbackend.domain.llm.screenTime.dto.internal.UserContextDto;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
 import com.dm.dmbackend.domain.llm.screenTime.entity.ScreenTime;
 import com.dm.dmbackend.domain.llm.screenTime.repository.ScreenTimeRepository;
@@ -44,7 +44,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     public void getScreenTimeCure(ScreenTimeCureRequest screenTimeCureRequest,
                                                          LoginUserDto loginUser) {
         String ragInput = toCureRagPayload(screenTimeCureRequest);
-        UserContext ctx = buildUserContext(loginUser);
+        UserContextDto ctx = buildUserContext(loginUser);
         String ragQuery = buildRagQuery(loginUser.getMotivationType()); // 검색 전용 짧은 질의
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
         String cureMessage = cure.message(
@@ -88,7 +88,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     public void getScreenTimeMotivate(LoginUserDto loginUser){
         NotificationValidator.validateNotification(loginUser);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        UserContext ctx = buildUserContext(loginUser);
+        UserContextDto ctx = buildUserContext(loginUser);
         // 동기부여 메시지 생성 (goal_detail 주입!)
         String motivateMessage = motivate.message(
                 ctx.getMotivationPrompt(),
@@ -151,7 +151,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
     }
 
     // 사용자 메타 + 목표 요약을 포함한 컨텍스트 데이터 생성
-    private UserContext buildUserContext(LoginUserDto loginUser) {
+    private UserContextDto buildUserContext(LoginUserDto loginUser) {
         String motivationPrompt = mapMotivationPrompt(loginUser.getMotivationType());
         LocalDate birthday = loginUser.getBirthday();
         int age = birthday != null ? Period.between(birthday, LocalDate.now()).getYears() : 0;
@@ -160,7 +160,7 @@ public class ScreenTimeServiceImpl implements ScreenTimeService {
 
         // 프롬프트용 목표 요약 (상위 3개)
         String goalSummary = mainGoalService.buildCompactGoalSummary(loginUser, 3);
-        return new UserContext(motivationPrompt, userData, goalSummary);
+        return new UserContextDto(motivationPrompt, userData, goalSummary);
     }
 
     // 앱별 사용시간을 합산·정렬한 최소 JSON 생성

@@ -1,15 +1,21 @@
 package com.dm.dmbackend.domain.account.oauth2.oauth2App.serviceImpl;
 
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
+import com.dm.dmbackend.domain.account.auth.dto.req.LoginRequest;
+import com.dm.dmbackend.domain.account.auth.dto.res.LoginResponse;
+import com.dm.dmbackend.domain.account.auth.service.AuthService;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
 import com.dm.dmbackend.domain.account.member.entity.Member;
-import com.dm.dmbackend.domain.account.oauth2.oauth2App.config.OAuth2Properties;
+import com.dm.dmbackend.domain.account.oauth2.oauth2App.config.OAuth2AppProperties;
+import com.dm.dmbackend.domain.account.oauth2.oauth2App.dto.req.OAuth2AppLoginRequest;
+import com.dm.dmbackend.domain.account.oauth2.oauth2App.dto.res.OAuth2AppTokensResponse;
+import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.domain.account.oauth2.identity.service.IdentityService;
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.service.OAuth2AppService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,39 +27,41 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class OAuth2AppServiceImpl implements OAuth2AppService {
-    private final OAuth2Properties props;
-    private final RestTemplate rest = new RestTemplate();
+    private final OAuth2AppProperties props;
+    private final AuthService authService;
+    private final IdentityService identityService;
+    private final WebClient webClient;
+    private record SocialProfileCandidate(String socialId, MemberSignUpRequest candidate) {}
 
-    // provider 토큰을 검증하고, 가입 후보 MemberForm 으로 변환
-    public MemberForm toMemberForm(String provider, Object requestBody) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> req = (Map<String, Object>) requestBody;
-        switch (provider.toLowerCase()) {
-            case "google":
-                String idToken = (String) req.get("idToken");
-                Assert.hasText(idToken, "idToken is required for Google");
-                return fromGoogleIdToken(idToken);
-            case "kakao":
-                String kakaoAccess = (String) req.get("accessToken");
-                Assert.hasText(kakaoAccess, "accessToken is required for Kakao");
-                return fromKakaoAccessToken(kakaoAccess);
-            case "naver":
-                String naverAccess = (String) req.get("accessToken");
-                Assert.hasText(naverAccess, "accessToken is required for Naver");
-                return fromNaverAccessToken(naverAccess);
-            default:
-                throw new IllegalArgumentException("지원되지 않는 provider: " + provider);
-        }
+    // 앱 소셜 로그인(회원가입)
+    @Override
+    public OAuth2AppTokensResponse appLogin(OAuth2Provider provider, OAuth2AppLoginRequest req) {
+        // 1) 토큰 검증 & 프로필 → 가입 후보 DTO
+        SocialProfileCandidate profile = switch (provider) {
+            case GOOGLE -> googleProfile(req.getIdToken());
+            case KAKAO  -> kakaoProfile(req.getAccessToken());
+            case NAVER  -> naverProfile(req.getAccessToken());
+        };
+        // 2) (provider, socialId) 기준으로 멤버 보장(없으면 생성 후 연결)
+        Member member = identityService.ensureMemberBySocial(provider, profile.socialId(), profile.candidate());
+
+        // 2) 로그인(JWT 발급) — 소셜 플래그로 비번 검증 생략
+        LoginResponse login = authService.login(
+                LoginRequest.builder().email(member.getEmail()).build(),
+                true
+        );
+        return new OAuth2AppTokensResponse(login.getAccessToken(), login.getRefreshToken());
     }
 
-    // -------- Google: ID Token 검증 (tokeninfo 사용; 운영은 JWKS 검증 권장) --------
-    private MemberForm fromGoogleIdToken(String idToken) {
-        String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
-        ResponseEntity<Map> res = rest.getForEntity(url, Map.class);
-        if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
-            throw new IllegalStateException("Google tokeninfo 실패");
-        }
-        Map<String, Object> body = res.getBody();
+    // ----------------- Google: ID Token 검증 -----------------
+    private SocialProfileCandidate googleProfile(String idToken) {
+        String url = "https://oauth2.googleapis.com/tokeninfo?id_token={idToken}";
+        Map<String, Object> body = webClient.get()
+                .uri(url, idToken)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+        if (body == null) throw new IllegalStateException("Google tokeninfo 실패");
         // aud 검증
         String aud = (String) body.get("aud");
         String expectedAud = props.getProviders().get("google").getClientId();
@@ -68,76 +76,77 @@ public class OAuth2AppServiceImpl implements OAuth2AppService {
                 throw new IllegalStateException("Google ID Token 만료");
             }
         }
-        String email   = (String) body.get("email");
-        String name    = (String) body.getOrDefault("name", "GoogleUser");
-        // 구글 ID 토큰에는 보통 gender/birthday 없음 → null
-        Member.Gender gender = null;
-        LocalDate birthday = null;
-        return buildMemberForm(name, email, gender, birthday);
+        String sub   = (String) body.get("sub"); // 소셜 고유 ID
+        String email = (String) body.get("email");
+        String name  = (String) body.getOrDefault("name", "GoogleUser");
+        return new SocialProfileCandidate(
+                sub,
+                buildMemberForm(name, email, null, null)
+        );
     }
 
-    // -------- Kakao: /v2/user/me --------
+    // ----------------- Kakao: /v2/user/me -----------------
     @SuppressWarnings("unchecked")
-    private MemberForm fromKakaoAccessToken(String accessToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    private SocialProfileCandidate kakaoProfile(String accessToken) {
+        Map<String, Object> body = webClient.get()
+                .uri(props.getProviders().get("kakao").getUserInfoUri())
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+        if (body == null) throw new IllegalStateException("Kakao 사용자 조회 실패");
+        String id = String.valueOf(body.get("id")); // 소셜 고유 ID
 
-        ResponseEntity<Map> res = rest.exchange(
-                props.getProviders().get("kakao").getUserInfoUri(),
-                HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-
-        if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
-            throw new IllegalStateException("Kakao 사용자 조회 실패");
-        }
-        Map<String, Object> body = res.getBody();
-        String id = String.valueOf(body.get("id"));
         Map<String, Object> account = (Map<String, Object>) body.get("kakao_account");
         Map<String, Object> profile = account != null ? (Map<String, Object>) account.get("profile") : null;
 
-        // 필수동의: profile_nickname, account_email
-        String nickname  = profile != null ? (String) profile.getOrDefault("nickname", "KakaoUser") : "KakaoUser";
+        String nickname = profile != null
+                ? (String) profile.getOrDefault("nickname", "KakaoUser")
+                : "KakaoUser";
         String email = account != null ? (String) account.get("email") : null;
         if (email == null || email.isBlank()) {
             email = "kakao_" + id + "@example.com"; // 방어적 플레이스홀더
         }
-        Member.Gender gender = null;
-        LocalDate birthday = null;
-        return buildMemberForm(nickname, email, gender, birthday);
+        return new SocialProfileCandidate(
+                id,
+                buildMemberForm(nickname, email, null, null)
+        );
     }
 
-    // -------- Naver: /v1/nid/me --------
+    // ----------------- Naver: /v1/nid/me -----------------
     @SuppressWarnings("unchecked")
-    private MemberForm fromNaverAccessToken(String accessToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        ResponseEntity<Map> res = rest.exchange(
-                props.getProviders().get("naver").getUserInfoUri(),
-                HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+    private SocialProfileCandidate naverProfile(String accessToken) {
+        Map<String, Object> outer = webClient.get()
+                .uri(props.getProviders().get("naver").getUserInfoUri())
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+        if (outer == null) throw new IllegalStateException("Naver 사용자 조회 실패");
 
-        if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
-            throw new IllegalStateException("Naver 사용자 조회 실패");
-        }
-        Map<String, Object> outer = res.getBody();
         Map<String, Object> response = (Map<String, Object>) outer.get("response");
         if (response == null) throw new IllegalStateException("Naver response 누락");
 
-        // 필수동의: 연락처 이메일, 별명, 성별, 생일
-        String email     = (String) response.get("email");           // ex) "user@example.com"
+        String id        = (String) response.get("id"); // 소셜 고유 ID
+        String email     = (String) response.get("email");
         String nickname  = (String) response.getOrDefault("nickname", "NaverUser");
-        String genderStr = (String) response.get("gender");          // "M"/"F"
-        String birthyear = (String) response.get("birthyear");       // "YYYY" (선택적으로 제공될 수 있음)
-        String birthday  = (String) response.get("birthday");        // "MM-DD"
-        Member.Gender gender = toGender(genderStr);                  // M/F → MALE/FEMALE
+        String genderStr = (String) response.get("gender");
+        String birthyear = (String) response.get("birthyear");
+        String birthday  = (String) response.get("birthday");
+
+        Member.Gender gender = toGender(genderStr);
         LocalDate birthDate  = parseNaverBirthday(birthyear, birthday);
-        return buildMemberForm(nickname, email, gender, birthDate);
+        return new SocialProfileCandidate(
+                id,
+                buildMemberForm(nickname, email, gender, birthDate)
+        );
     }
 
     // ----------------- 헬퍼 메서드 -----------------
 
     // 필요한 필드만 채워 MemberForm 생성 (비밀번호 null)
-    private MemberForm buildMemberForm(String nickname, String email, Member.Gender gender, LocalDate birthday) {
-        return MemberForm.builder()
+    private MemberSignUpRequest buildMemberForm(String nickname, String email, Member.Gender gender, LocalDate birthday) {
+        return MemberSignUpRequest.builder()
                 .nickname(nickname)
                 .job(null)
                 .email(email)

@@ -21,12 +21,12 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 public class MemberFollow extends BaseEntity {
     // 팔로우 하는 멤버
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "follow_id", nullable = false)
     private Member follow;
 
     // 팔로우 당하는 멤버
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "followed_id", nullable = false)
     private Member followed;
 }

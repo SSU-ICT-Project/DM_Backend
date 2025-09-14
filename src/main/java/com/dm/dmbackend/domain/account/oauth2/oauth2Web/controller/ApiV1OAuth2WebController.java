@@ -1,12 +1,13 @@
 package com.dm.dmbackend.domain.account.oauth2.oauth2Web.controller;
 
-import com.dm.dmbackend.domain.account.auth.dto.req.LoginForm;
-import com.dm.dmbackend.domain.account.auth.dto.res.Auth;
+import com.dm.dmbackend.domain.account.auth.dto.req.LoginRequest;
+import com.dm.dmbackend.domain.account.auth.dto.res.LoginResponse;
 import com.dm.dmbackend.domain.account.auth.service.AuthService;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
+import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,32 +34,31 @@ public class ApiV1OAuth2WebController {
     @Value("${frontend.oauth-redirect}")
     private String frontendRedirect;
 
-    // 소셜 로그인 리디렉션 URL
+    // 웹 소셜 로그인 리디렉션 URL
     @GetMapping("/redirect-url/{provider}")
     @Operation(summary = "소셜 로그인 리디렉션 URL")
-    public ApiResponse<String> redirectToProvider(@PathVariable("provider") String provider) {
+    public ApiResponse<String> redirectToProvider(@PathVariable("provider") OAuth2Provider provider) {
         String authUrl = oAuth2WebService.getAuthUrl(provider);
-        return ApiResponse.of(authUrl);
+        return ApiResponse.success(authUrl);
     }
 
-    // 소셜 로그인
+    // 웹 소셜 로그인
     @GetMapping("/{provider}")
-    @Operation(summary = "소셜 로그인")
+    @Operation(summary = "웹 소셜 로그인", description = "provider={GOOGLE|KAKAO|NAVER}")
     public ResponseEntity<Void> socialLogin(
             @PathVariable("provider") String provider,
             @RequestParam("code") String code) {
-
         // 소셜 유저 정보 조회
         Map<String, String> socialUser = oAuth2WebService.getUserInfo(provider, code);
         String email = socialUser.get("email");
         String name = socialUser.get("name");
 
         // 로그인 또는 회원가입 처리
-        LoginForm socialLoginForm;
+        LoginRequest socialLoginRequest;
         if (memberRepository.existsByEmail(email)) {
-            socialLoginForm = LoginForm.builder().email(email).build();
+            socialLoginRequest = LoginRequest.builder().email(email).build();
         } else {
-            MemberForm memberForm = MemberForm.builder()
+            MemberSignUpRequest memberSignUpRequest = MemberSignUpRequest.builder()
                     .nickname(null)
                     .job(null)
                     .email(email)
@@ -67,12 +67,12 @@ public class ApiV1OAuth2WebController {
                     .gender(null)
                     .birthday(null)
                     .build();
-            memberService.signup(memberForm);
-            socialLoginForm = LoginForm.builder().email(memberForm.getEmail()).build();
+            memberService.signup(memberSignUpRequest);
+            socialLoginRequest = LoginRequest.builder().email(memberSignUpRequest.getEmail()).build();
         }
-        Auth auth = authService.login(socialLoginForm, true);
-        String accessToken = auth.getAccessToken();
-        String refreshToken = auth.getRefreshToken();
+        LoginResponse loginResponse = authService.login(socialLoginRequest, true);
+        String accessToken = loginResponse.getAccessToken();
+        String refreshToken = loginResponse.getRefreshToken();
 
         // 프론트엔드 리디렉션 주소에 토큰을 쿼리로 포함
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirect)
