@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.fcm.serviceImpl;
 
-import com.dm.dmbackend.domain.fcm.dto.FcmMessage;
+import com.dm.dmbackend.domain.fcm.dto.res.FcmMessageResponse;
 import com.dm.dmbackend.domain.fcm.service.FcmService;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class FcmServiceImpl implements FcmService {
 
     @Override
-    public void sendMessageTo(FcmMessage message) {
+    public void sendMessageTo(FcmMessageResponse message) {
         try {
             Message firebaseMessage = Message.builder()
                     .setToken(message.getTargetToken())

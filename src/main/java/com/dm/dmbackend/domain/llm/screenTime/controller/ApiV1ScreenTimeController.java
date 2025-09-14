@@ -5,7 +5,6 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.llm.screenTime.dto.req.ScreenTimeCureRequest;
 import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
-import com.dm.dmbackend.global.exception.ReturnCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,17 +24,17 @@ public class ApiV1ScreenTimeController {
     // 중독 치료 메시지 생성
     @PostMapping("/cure")
     @Operation(summary = "중독 치료 메시지 생성")
-    public ApiResponse<String> getScreenTimeCure(@RequestBody @Valid ScreenTimeCureRequest screenTimeCureRequest,
+    public ApiResponse<Void> getScreenTimeCure(@RequestBody @Valid ScreenTimeCureRequest screenTimeCureRequest,
                                                                       @LoginUser LoginUserDto loginUser) {
         screenTimeService.getScreenTimeCure(screenTimeCureRequest,loginUser);
-        return ApiResponse.of(ReturnCode.SUCCESS);
+        return ApiResponse.success();
     }
 
     // 동기부여 메시지 생성
     @PostMapping("/motivate")
     @Operation(summary = "동기부여 메시지 생성")
-    public ApiResponse<String> getScreenTimeMotivate(@LoginUser LoginUserDto loginUser) {
+    public ApiResponse<Void> getScreenTimeMotivate(@LoginUser LoginUserDto loginUser) {
         screenTimeService.getScreenTimeMotivate(loginUser);
-        return ApiResponse.of(ReturnCode.SUCCESS);
+        return ApiResponse.success();
     }
 }

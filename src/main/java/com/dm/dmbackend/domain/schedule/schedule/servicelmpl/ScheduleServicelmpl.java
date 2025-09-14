@@ -85,7 +85,7 @@ public class ScheduleServicelmpl implements ScheduleService {
                 .orElseThrow(() -> new ServiceException(ReturnCode.SCHEDULE_NOT_FOUND));
         // 권한 확인
         if (!schedule.getMember().getId().equals(loginUser.getId())) {
-            throw new ServiceException(ReturnCode.UNAUTHORIZED_ACCESS);
+            throw new ServiceException(ReturnCode.UNAUTHORIZED_SCHEDULE_ACCESS);
         }
         return convertToScheduleResponse(schedule);
     }
@@ -99,7 +99,7 @@ public class ScheduleServicelmpl implements ScheduleService {
                 .orElseThrow(() -> new ServiceException(ReturnCode.SCHEDULE_NOT_FOUND));
         // 권한 확인
         if (!schedule.getMember().getId().equals(loginUser.getId())) {
-            throw new ServiceException(ReturnCode.UNAUTHORIZED_ACCESS);
+            throw new ServiceException(ReturnCode.UNAUTHORIZED_SCHEDULE_ACCESS);
         }
         if (scheduleRequest.getScheduleName() != null) {
             schedule.setScheduleName(scheduleRequest.getScheduleName());
@@ -134,7 +134,7 @@ public class ScheduleServicelmpl implements ScheduleService {
                 .orElseThrow(() -> new ServiceException(ReturnCode.SCHEDULE_NOT_FOUND));
         // 권한 확인
         if (!schedule.getMember().getId().equals(loginUser.getId())) {
-            throw new ServiceException(ReturnCode.UNAUTHORIZED_ACCESS);
+            throw new ServiceException(ReturnCode.UNAUTHORIZED_SCHEDULE_ACCESS);
         }
         scheduleRepository.delete(schedule);
     }

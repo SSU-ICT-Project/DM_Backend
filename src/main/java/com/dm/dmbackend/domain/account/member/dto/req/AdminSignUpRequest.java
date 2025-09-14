@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminForm {
+public class AdminSignUpRequest {
     private String nickname;
     private String job;
     private String email;

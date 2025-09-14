@@ -1,8 +1,8 @@
 package com.dm.dmbackend.domain.notification.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.notification.dto.req.NotificationForm;
-import com.dm.dmbackend.domain.notification.dto.res.NotificationDto;
+import com.dm.dmbackend.domain.notification.dto.req.NotificationRequest;
+import com.dm.dmbackend.domain.notification.dto.res.NotificationResponse;
 import com.dm.dmbackend.domain.notification.entity.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +12,11 @@ public interface NotificationService {
     void createNotification(Notification notification);
 
     // 알림 목록 조회
-    Page<NotificationDto> getNotifications(Pageable pageable, LoginUserDto loginUser);
+    Page<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser);
 
     // 알림 읽음 처리
-    void markAsRead(NotificationForm notificationForm, LoginUserDto loginUser);
+    void markAsRead(NotificationRequest notificationRequest, LoginUserDto loginUser);
 
     // Notification을 NotificationDto로 변환
-    NotificationDto convertToNotificationDto(Notification notification);
+    NotificationResponse convertToNotificationDto(Notification notification);
 }

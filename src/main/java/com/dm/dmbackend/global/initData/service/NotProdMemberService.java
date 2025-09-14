@@ -1,8 +1,8 @@
 package com.dm.dmbackend.global.initData.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.dto.req.AdminForm;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
+import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
@@ -39,7 +39,7 @@ public class NotProdMemberService {
         for (int i = 0; i < names.size(); i++) {
             int minutes = 10 + (i * 5); // 10,15,20,25,30
             Location location = buildLocation(names.get(i));
-            MemberForm memberForm = MemberForm.builder()
+            MemberSignUpRequest memberSignUpRequest = MemberSignUpRequest.builder()
                     .nickname(nicknames.get(i))
                     .job(jobs.get(i))
                     .email("user" + (i + 1) + "@example.com")
@@ -51,14 +51,14 @@ public class NotProdMemberService {
                     .distractionAppList(buildDistractionApps(i + 1)) // 1개 → 5개
                     .location(location)
                     .build();
-            memberService.signup(memberForm);
-            Member member = memberRepository.findByEmail(memberForm.getEmail())
+            memberService.signup(memberSignUpRequest);
+            Member member = memberRepository.findByEmail(memberSignUpRequest.getEmail())
                     .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
             members.add(member);
         }
 
         // 관리자 생성
-        AdminForm adminForm = AdminForm.builder()
+        AdminSignUpRequest adminSignUpRequest = AdminSignUpRequest.builder()
                 .nickname("admin6")
                 .email("admin6@gmail.com")
                 .job(jobs.get(0))
@@ -68,8 +68,8 @@ public class NotProdMemberService {
                 .memberRole(Member.MemberRole.ROLE_ADMIN)
                 .birthday(LocalDate.of(2001, 1, 1))
                 .build();
-        memberService.adminSignup(adminForm);
-        Member admin = memberRepository.findByEmail(adminForm.getEmail())
+        memberService.adminSignup(adminSignUpRequest);
+        Member admin = memberRepository.findByEmail(adminSignUpRequest.getEmail())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         members.add(admin);
         return members;

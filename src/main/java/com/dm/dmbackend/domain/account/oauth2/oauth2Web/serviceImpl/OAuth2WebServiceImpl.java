@@ -2,6 +2,7 @@ package com.dm.dmbackend.domain.account.oauth2.oauth2Web.serviceImpl;
 
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.dto.res.OAuth2WebProperties;
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
+import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -21,47 +22,41 @@ public class OAuth2WebServiceImpl implements OAuth2WebService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final OAuth2WebProperties oAuth2WebProperties;
 
-    // 소셜 로그인 리디렉션 URL 생성
-    public String getAuthUrl(String provider) {
-        OAuth2WebProperties.ProviderProperties providerProps = oAuth2WebProperties.getProviders().get(provider);
+    // 웹 소셜 로그인 리디렉션 URL 생성
+    public String getAuthUrl(OAuth2Provider provider) {
+        OAuth2WebProperties.ProviderProperties providerProps =
+                oAuth2WebProperties.getProviders().get(provider.name().toLowerCase());
+
         if (providerProps == null) {
             throw new IllegalArgumentException("지원되지 않는 OAuth2 제공자: " + provider);
         }
-        String authUrl;
-        switch (provider.toLowerCase()) {
-            case "google":
-                authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
-                        + "?client_id=" + providerProps.getClientId()
-                        + "&redirect_uri=" + providerProps.getRedirectUri()
-                        + "&response_type=code"
-                        + "&scope=openid%20profile%20email"
-                        + "&state=" + generateState();
-                break;
-            case "kakao":
-                authUrl = "https://kauth.kakao.com/oauth/authorize"
-                        + "?client_id=" + providerProps.getClientId()
-                        + "&redirect_uri=" + providerProps.getRedirectUri()
-                        + "&response_type=code"
-                        + "&scope=account_email";
-                break;
-            case "naver":
-                authUrl = "https://nid.naver.com/oauth2.0/authorize"
-                        + "?client_id=" + providerProps.getClientId()
-                        + "&redirect_uri=" + providerProps.getRedirectUri()
-                        + "&response_type=code"
-                        + "&scope=email";
-                break;
-            default:
-                throw new IllegalArgumentException("지원되지 않는 OAuth2 제공자: " + provider);
-        }
-        return authUrl;
+        return switch (provider) {
+            case GOOGLE -> "https://accounts.google.com/o/oauth2/v2/auth"
+                    + "?client_id=" + providerProps.getClientId()
+                    + "&redirect_uri=" + providerProps.getRedirectUri()
+                    + "&response_type=code"
+                    + "&scope=openid%20profile%20email"
+                    + "&state=" + generateState();
+
+            case KAKAO -> "https://kauth.kakao.com/oauth/authorize"
+                    + "?client_id=" + providerProps.getClientId()
+                    + "&redirect_uri=" + providerProps.getRedirectUri()
+                    + "&response_type=code"
+                    + "&scope=account_email";
+
+            case NAVER -> "https://nid.naver.com/oauth2.0/authorize"
+                    + "?client_id=" + providerProps.getClientId()
+                    + "&redirect_uri=" + providerProps.getRedirectUri()
+                    + "&response_type=code"
+                    + "&scope=email";
+        };
     }
 
     private String generateState() {
         return UUID.randomUUID().toString(); // CSRF 방지용 랜덤 값
     }
 
-    // 소셜 로그인
+    // 웹 소셜 로그인
     public Map<String, String> getUserInfo(String provider, String code) {
         OAuth2WebProperties.ProviderProperties providerProps = oAuth2WebProperties.getProviders().get(provider);
         if (providerProps == null) {

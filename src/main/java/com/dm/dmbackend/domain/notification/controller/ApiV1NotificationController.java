@@ -2,13 +2,11 @@ package com.dm.dmbackend.domain.notification.controller;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUser;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.notification.dto.req.NotificationForm;
-import com.dm.dmbackend.domain.notification.dto.res.NotificationDto;
+import com.dm.dmbackend.domain.notification.dto.req.NotificationRequest;
+import com.dm.dmbackend.domain.notification.dto.res.NotificationResponse;
 import com.dm.dmbackend.domain.notification.entity.NotificationPage;
 import com.dm.dmbackend.domain.notification.service.NotificationService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
-import com.dm.dmbackend.global.common.response.DMPage;
-import com.dm.dmbackend.global.exception.ReturnCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/rest-api/v1/notification")
@@ -27,17 +27,17 @@ public class ApiV1NotificationController {
     // 알림 목록 조회
     @GetMapping
     @Operation(summary = "알림 목록 조회")
-    public ApiResponse<NotificationDto> getNotifications(@ModelAttribute NotificationPage notificationPage, @LoginUser LoginUserDto loginUser) {
+    public ApiResponse<List<NotificationResponse>> getNotifications(@ModelAttribute NotificationPage notificationPage, @LoginUser LoginUserDto loginUser) {
         Pageable pageable = PageRequest.of(notificationPage.getPage(), notificationPage.getSize());
-        return ApiResponse.of(DMPage.of(notificationService.getNotifications(pageable, loginUser)));
+        return ApiResponse.success(notificationService.getNotifications(pageable, loginUser));
     }
 
     // 알림 읽음 처리
     @PutMapping
     @Operation(summary = "알림 읽음 처리")
-    public ApiResponse<String> markAsRead(@RequestBody @Valid NotificationForm notificationForm,
+    public ApiResponse<Void> markAsRead(@RequestBody @Valid NotificationRequest notificationRequest,
                                           @LoginUser LoginUserDto loginUser) {
-        notificationService.markAsRead(notificationForm, loginUser);
-        return ApiResponse.of(ReturnCode.SUCCESS);
+        notificationService.markAsRead(notificationRequest, loginUser);
+        return ApiResponse.success();
     }
 }

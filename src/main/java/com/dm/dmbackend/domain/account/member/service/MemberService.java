@@ -1,40 +1,40 @@
 package com.dm.dmbackend.domain.account.member.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.dto.req.AdminForm;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberForm;
-import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberDto;
-import com.dm.dmbackend.domain.account.member.dto.res.MemberDto;
+import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
+import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MemberService {
     // 회원가입 [가데이터/초기관리자 생성]
-    void adminSignup(AdminForm adminForm);
+    void adminSignup(AdminSignUpRequest adminSignUpRequest);
 
     // 회원가입
-    void signup(MemberForm memberForm);
+    void signup(MemberSignUpRequest memberSignUpRequest);
 
     // 본인 회원정보 조회
-    MemberDto getMyInfo(LoginUserDto loginUser);
+    MemberResponse getMyInfo(LoginUserDto loginUser);
 
     // 본인 상세회원정보 조회
-    DetailMemberDto getMyDetailInfo(LoginUserDto loginUser);
+    DetailMemberResponse getMyDetailInfo(LoginUserDto loginUser);
 
     // 다른 멤버의 회원정보 조회
-    MemberDto getMemberInfo(Long memberId);
+    MemberResponse getMemberInfo(Long memberId);
 
     // 다른 멤버의 상세회원정보 조회
-    DetailMemberDto getDetailMemberInfo(Long memberId);
+    DetailMemberResponse getDetailMemberInfo(Long memberId);
 
     // 회원정보 수정
-    void updateMember(MemberForm memberForm, LoginUserDto loginUser);
+    void updateMember(MemberSignUpRequest memberSignUpRequest, LoginUserDto loginUser);
 
     // 회원탈퇴
     void deleteMember(LoginUserDto loginUser);
 
     // 회원 검색하기
-    Page<MemberDto> searchMemberInfo(Pageable pageable, String keyword);
+    Page<MemberResponse> searchMemberInfo(Pageable pageable, String keyword);
 
     // 팔로우 요청하기
     void followReq(Long memberId, LoginUserDto loginUser);

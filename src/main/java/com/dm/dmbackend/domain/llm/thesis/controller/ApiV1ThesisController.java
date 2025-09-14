@@ -7,8 +7,6 @@ import com.dm.dmbackend.domain.llm.thesis.dto.res.ThesisResponse;
 import com.dm.dmbackend.domain.llm.thesis.entity.ThesisPage;
 import com.dm.dmbackend.domain.llm.thesis.service.ThesisService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
-import com.dm.dmbackend.global.common.response.DMPage;
-import com.dm.dmbackend.global.exception.ReturnCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,26 +28,27 @@ public class ApiV1ThesisController {
     // 논문 업로드
     @PostMapping
     @Operation(summary = "논문 업로드")
-    public ApiResponse<String> uploadThesis(@RequestPart(value = "pdfFile") List<MultipartFile> pdfFiles,
-                                            @LoginUser LoginUserDto loginUser) {
+    public ApiResponse<Void> uploadThesis(@RequestPart(value = "pdfFile") List<MultipartFile> pdfFiles,
+                                          @LoginUser LoginUserDto loginUser) {
         thesisService.uploadThesis(pdfFiles, loginUser);
-        return ApiResponse.of(ReturnCode.SUCCESS);
+        return ApiResponse.success();
     }
 
     // 논문 조회
     @GetMapping
     @Operation(summary = "논문 조회")
-    public ApiResponse<ThesisResponse> getThesis(@ModelAttribute ThesisPage thesisPage, @LoginUser LoginUserDto loginUser) {
+    public ApiResponse<List<ThesisResponse>> getThesis(@ModelAttribute ThesisPage thesisPage,
+                                                       @LoginUser LoginUserDto loginUser) {
         Pageable pageable = PageRequest.of(thesisPage.getPage(), thesisPage.getSize());
-        return ApiResponse.of(DMPage.of(thesisService.getThesis(pageable, loginUser)));
+        return ApiResponse.success(thesisService.getThesis(pageable, loginUser));
     }
 
     // 논문 삭제
     @DeleteMapping
     @Operation(summary = "논문 삭제")
-    public ApiResponse<String> deleteThesis(@RequestBody @Valid ThesisDeleteRequest thesisDeleteRequest,
-                                            @LoginUser LoginUserDto loginUser) {
+    public ApiResponse<Void> deleteThesis(@RequestBody @Valid ThesisDeleteRequest thesisDeleteRequest,
+                                          @LoginUser LoginUserDto loginUser) {
         thesisService.deleteThesis(thesisDeleteRequest, loginUser);
-        return ApiResponse.of(ReturnCode.SUCCESS);
+        return ApiResponse.success();
     }
 }

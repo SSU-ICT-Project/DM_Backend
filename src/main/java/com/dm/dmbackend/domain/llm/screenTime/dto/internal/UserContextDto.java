@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserContext {
+public class UserContextDto {
     private final String motivationPrompt;
     private final String userData;
     private final String goalSummary;

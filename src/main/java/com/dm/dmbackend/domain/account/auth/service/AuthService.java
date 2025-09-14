@@ -1,16 +1,16 @@
 package com.dm.dmbackend.domain.account.auth.service;
 
-import com.dm.dmbackend.domain.account.auth.dto.req.LoginForm;
-import com.dm.dmbackend.domain.account.auth.dto.res.Auth;
+import com.dm.dmbackend.domain.account.auth.dto.req.LoginRequest;
+import com.dm.dmbackend.domain.account.auth.dto.res.LoginResponse;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 
 public interface AuthService {
     // 로그인
-    Auth login(LoginForm loginForm, boolean isSocialLogin);
+    LoginResponse login(LoginRequest loginRequest, boolean isSocialLogin);
 
     // 로그아웃
     void logout(LoginUserDto loginUser);
 
     // accessToken 재발급
-    Auth refreshToken(String refreshToken, LoginUserDto loginUser);
+    LoginResponse refreshToken(String refreshToken, LoginUserDto loginUser);
 }
