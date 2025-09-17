@@ -1,7 +1,7 @@
 package com.dm.dmbackend.domain.account.member.repository;
 
 import com.dm.dmbackend.domain.account.member.entity.SocialAccount;
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

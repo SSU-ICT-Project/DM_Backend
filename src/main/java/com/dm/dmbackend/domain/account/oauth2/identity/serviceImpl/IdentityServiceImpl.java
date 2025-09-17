@@ -6,7 +6,7 @@ import com.dm.dmbackend.domain.account.member.entity.SocialAccount;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.repository.SocialAccountRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import com.dm.dmbackend.domain.account.oauth2.identity.service.IdentityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

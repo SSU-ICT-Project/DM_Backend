@@ -2,7 +2,7 @@ package com.dm.dmbackend.domain.account.oauth2.oauth2Web.serviceImpl;
 
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.dto.res.OAuth2WebProperties;
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;

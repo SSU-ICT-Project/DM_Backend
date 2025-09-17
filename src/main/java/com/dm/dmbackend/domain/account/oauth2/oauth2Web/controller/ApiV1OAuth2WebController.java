@@ -7,7 +7,7 @@ import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
