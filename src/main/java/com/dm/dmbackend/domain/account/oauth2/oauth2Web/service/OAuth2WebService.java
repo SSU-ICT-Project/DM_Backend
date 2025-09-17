@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.account.oauth2.oauth2Web.service;
 
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 
 import java.util.Map;
 

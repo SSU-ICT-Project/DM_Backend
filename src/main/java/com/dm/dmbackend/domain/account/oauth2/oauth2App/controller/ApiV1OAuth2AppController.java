@@ -2,7 +2,7 @@ package com.dm.dmbackend.domain.account.oauth2.oauth2App.controller;
 
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.dto.req.OAuth2AppLoginRequest;
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.dto.res.OAuth2AppTokensResponse;
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.service.OAuth2AppService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

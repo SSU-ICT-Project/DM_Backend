@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.account.member.entity;
 
-import com.dm.dmbackend.domain.account.oauth2.provider.OAuth2Provider;
+import com.dm.dmbackend.global.common.enums.OAuth2Provider;
 import com.dm.dmbackend.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
