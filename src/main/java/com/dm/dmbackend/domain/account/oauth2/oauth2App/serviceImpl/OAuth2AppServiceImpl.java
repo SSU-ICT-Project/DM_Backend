@@ -3,7 +3,7 @@ package com.dm.dmbackend.domain.account.oauth2.oauth2App.serviceImpl;
 import com.dm.dmbackend.domain.account.auth.dto.req.LoginRequest;
 import com.dm.dmbackend.domain.account.auth.dto.res.LoginResponse;
 import com.dm.dmbackend.domain.account.auth.service.AuthService;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.config.OAuth2AppProperties;
 import com.dm.dmbackend.domain.account.oauth2.oauth2App.dto.req.OAuth2AppLoginRequest;
@@ -31,7 +31,7 @@ public class OAuth2AppServiceImpl implements OAuth2AppService {
     private final AuthService authService;
     private final IdentityService identityService;
     private final WebClient webClient;
-    private record SocialProfileCandidate(String socialId, MemberSignUpRequest candidate) {}
+    private record SocialProfileCandidate(String socialId, MemberRequest candidate) {}
 
     // 앱 소셜 로그인(회원가입)
     @Override
@@ -145,8 +145,8 @@ public class OAuth2AppServiceImpl implements OAuth2AppService {
     // ----------------- 헬퍼 메서드 -----------------
 
     // 필요한 필드만 채워 MemberForm 생성 (비밀번호 null)
-    private MemberSignUpRequest buildMemberForm(String nickname, String email, Member.Gender gender, LocalDate birthday) {
-        return MemberSignUpRequest.builder()
+    private MemberRequest buildMemberForm(String nickname, String email, Member.Gender gender, LocalDate birthday) {
+        return MemberRequest.builder()
                 .nickname(nickname)
                 .job(null)
                 .email(email)

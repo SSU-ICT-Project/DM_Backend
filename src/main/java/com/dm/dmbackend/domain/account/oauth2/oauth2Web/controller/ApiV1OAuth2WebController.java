@@ -3,7 +3,7 @@ package com.dm.dmbackend.domain.account.oauth2.oauth2Web.controller;
 import com.dm.dmbackend.domain.account.auth.dto.req.LoginRequest;
 import com.dm.dmbackend.domain.account.auth.dto.res.LoginResponse;
 import com.dm.dmbackend.domain.account.auth.service.AuthService;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.domain.account.oauth2.oauth2Web.service.OAuth2WebService;
@@ -58,7 +58,7 @@ public class ApiV1OAuth2WebController {
         if (memberRepository.existsByEmail(email)) {
             socialLoginRequest = LoginRequest.builder().email(email).build();
         } else {
-            MemberSignUpRequest memberSignUpRequest = MemberSignUpRequest.builder()
+            MemberRequest memberRequest = MemberRequest.builder()
                     .nickname(null)
                     .job(null)
                     .email(email)
@@ -67,8 +67,8 @@ public class ApiV1OAuth2WebController {
                     .gender(null)
                     .birthday(null)
                     .build();
-            memberService.signup(memberSignUpRequest);
-            socialLoginRequest = LoginRequest.builder().email(memberSignUpRequest.getEmail()).build();
+            memberService.signup(memberRequest);
+            socialLoginRequest = LoginRequest.builder().email(memberRequest.getEmail()).build();
         }
         LoginResponse loginResponse = authService.login(socialLoginRequest, true);
         String accessToken = loginResponse.getAccessToken();

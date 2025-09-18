@@ -2,7 +2,7 @@ package com.dm.dmbackend.global.initData.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
@@ -39,7 +39,7 @@ public class NotProdMemberService {
         for (int i = 0; i < names.size(); i++) {
             int minutes = 10 + (i * 5); // 10,15,20,25,30
             Location location = buildLocation(names.get(i));
-            MemberSignUpRequest memberSignUpRequest = MemberSignUpRequest.builder()
+            MemberRequest memberRequest = MemberRequest.builder()
                     .nickname(nicknames.get(i))
                     .job(jobs.get(i))
                     .email("user" + (i + 1) + "@example.com")
@@ -51,8 +51,8 @@ public class NotProdMemberService {
                     .distractionAppList(buildDistractionApps(i + 1)) // 1개 → 5개
                     .location(location)
                     .build();
-            memberService.signup(memberSignUpRequest);
-            Member member = memberRepository.findByEmail(memberSignUpRequest.getEmail())
+            memberService.signup(memberRequest);
+            Member member = memberRepository.findByEmail(memberRequest.getEmail())
                     .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
             members.add(member);
         }
