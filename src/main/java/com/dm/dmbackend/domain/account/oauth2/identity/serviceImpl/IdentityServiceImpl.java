@@ -1,6 +1,6 @@
 package com.dm.dmbackend.domain.account.oauth2.identity.serviceImpl;
 
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.entity.SocialAccount;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
@@ -24,7 +24,7 @@ public class IdentityServiceImpl implements IdentityService {
 
     // (provider, socialId) 기준으로 멤버 보장
     @Transactional
-    public Member ensureMemberBySocial(OAuth2Provider provider, String socialId, MemberSignUpRequest candidate) {
+    public Member ensureMemberBySocial(OAuth2Provider provider, String socialId, MemberRequest candidate) {
         return socialAccountRepository.findByProviderAndProviderUserId(provider, socialId)
                 .map(SocialAccount::getMember)
                 .orElseGet(() -> {

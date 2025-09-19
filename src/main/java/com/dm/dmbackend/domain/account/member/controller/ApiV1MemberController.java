@@ -2,7 +2,7 @@ package com.dm.dmbackend.domain.account.member.controller;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUser;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
 import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
 import com.dm.dmbackend.domain.account.member.entity.MemberPage;
@@ -28,8 +28,8 @@ public class ApiV1MemberController {
     // 회원가입
     @PostMapping
     @Operation(summary = "회원가입")
-    public ApiResponse<Void> signup(@RequestBody @Valid MemberSignUpRequest memberSignUpRequest) {
-        memberService.signup(memberSignUpRequest);
+    public ApiResponse<Void> signup(@RequestBody @Valid MemberRequest memberRequest) {
+        memberService.signup(memberRequest);
         return ApiResponse.success();
     }
 
@@ -64,9 +64,9 @@ public class ApiV1MemberController {
     // 회원정보 수정
     @PutMapping
     @Operation(summary = "회원정보 수정")
-    public ApiResponse<Void> updateMemberInfo(@RequestBody @Valid MemberSignUpRequest memberSignUpRequest,
+    public ApiResponse<Void> updateMemberInfo(@RequestBody @Valid MemberRequest memberRequest,
                                               @LoginUser LoginUserDto loginUser) {
-        memberService.updateMember(memberSignUpRequest, loginUser);
+        memberService.updateMember(memberRequest, loginUser);
         return ApiResponse.success();
     }
 

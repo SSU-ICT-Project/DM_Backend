@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberSignUpRequest {
+public class MemberRequest {
     private String nickname;
     private String job;
     private String email;

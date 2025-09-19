@@ -3,7 +3,7 @@ package com.dm.dmbackend.domain.account.member.serviceImpl;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.auth.service.AuthService;
 import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
 import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
 import com.dm.dmbackend.domain.account.member.dto.res.SimpleMemberDto;
@@ -71,23 +71,23 @@ public class MemberServiceImpl implements MemberService {
     // 회원가입
     @Override
     @Transactional
-    public void signup(MemberSignUpRequest memberSignUpRequest) {
-        if (memberRepository.existsByEmail((memberSignUpRequest.getEmail()))) {
+    public void signup(MemberRequest memberRequest) {
+        if (memberRepository.existsByEmail((memberRequest.getEmail()))) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
         // 비밀번호가 없으면 null로 처리하거나 다른 처리를 할 수 있습니다.
-        String encodedPassword = memberSignUpRequest.getPassword() != null ? passwordEncoder.encode(memberSignUpRequest.getPassword()) : null;
+        String encodedPassword = memberRequest.getPassword() != null ? passwordEncoder.encode(memberRequest.getPassword()) : null;
         Member member = Member.builder()
-                .nickname(memberSignUpRequest.getNickname())
-                .job(memberSignUpRequest.getJob())
-                .email(memberSignUpRequest.getEmail())
+                .nickname(memberRequest.getNickname())
+                .job(memberRequest.getJob())
+                .email(memberRequest.getEmail())
                 .password(encodedPassword)  // 인코딩된 비밀번호 저장
-                .motivationType(memberSignUpRequest.getMotivationType())
-                .gender(memberSignUpRequest.getGender())
-                .birthday(memberSignUpRequest.getBirthday())
-                .averagePreparationTime(memberSignUpRequest.getAveragePreparationTime())
-                .distractionAppList(memberSignUpRequest.getDistractionAppList())
-                .location(memberSignUpRequest.getLocation())
+                .motivationType(memberRequest.getMotivationType())
+                .gender(memberRequest.getGender())
+                .birthday(memberRequest.getBirthday())
+                .averagePreparationTime(memberRequest.getAveragePreparationTime())
+                .distractionAppList(memberRequest.getDistractionAppList())
+                .location(memberRequest.getLocation())
                 .build();
         memberRepository.save(member);
     }
@@ -127,7 +127,7 @@ public class MemberServiceImpl implements MemberService {
     // 회원정보 수정
     @Override
     @Transactional
-    public void updateMember(MemberSignUpRequest memberSignUpRequest, LoginUserDto loginUser) {
+    public void updateMember(MemberRequest memberRequest, LoginUserDto loginUser) {
         // 기존 이미지 삭제 후 입력 받은 이미지 S3에 저장
 //        String imageUrl = loginUser.getProfileImageUrl(); // 기본적으로 기존 이미지 URL을 사용
 //        if (imageFile != null && !imageFile.isEmpty()) {
@@ -147,38 +147,38 @@ public class MemberServiceImpl implements MemberService {
 //            }
 //            imageUrl = null;
 //        }
-        if (memberSignUpRequest.getNickname() != null) {
-            loginUser.setNickname(memberSignUpRequest.getNickname());
+        if (memberRequest.getNickname() != null) {
+            loginUser.setNickname(memberRequest.getNickname());
         }
-        if (memberSignUpRequest.getJob() != null) {
-            loginUser.setJob(memberSignUpRequest.getJob());
+        if (memberRequest.getJob() != null) {
+            loginUser.setJob(memberRequest.getJob());
         }
-        if (memberSignUpRequest.getEmail() != null) {
-            loginUser.setEmail(memberSignUpRequest.getEmail());
+        if (memberRequest.getEmail() != null) {
+            loginUser.setEmail(memberRequest.getEmail());
         }
-        if (memberSignUpRequest.getPassword() != null && !memberSignUpRequest.getPassword().isEmpty()) {
-            loginUser.setPassword(BCrypt.hashpw(memberSignUpRequest.getPassword(), BCrypt.gensalt()));
+        if (memberRequest.getPassword() != null && !memberRequest.getPassword().isEmpty()) {
+            loginUser.setPassword(BCrypt.hashpw(memberRequest.getPassword(), BCrypt.gensalt()));
         }
-        if (memberSignUpRequest.getBirthday() != null) {
-            loginUser.setBirthday(memberSignUpRequest.getBirthday());
+        if (memberRequest.getBirthday() != null) {
+            loginUser.setBirthday(memberRequest.getBirthday());
         }
-        if (memberSignUpRequest.getAveragePreparationTime() != null) {
-            loginUser.setAveragePreparationTime(memberSignUpRequest.getAveragePreparationTime());
+        if (memberRequest.getAveragePreparationTime() != null) {
+            loginUser.setAveragePreparationTime(memberRequest.getAveragePreparationTime());
         }
-        if (memberSignUpRequest.getDistractionAppList() != null) {
-            loginUser.setDistractionAppList(memberSignUpRequest.getDistractionAppList());
+        if (memberRequest.getDistractionAppList() != null) {
+            loginUser.setDistractionAppList(memberRequest.getDistractionAppList());
         }
-        if (memberSignUpRequest.getLocation() != null) {
-            loginUser.setLocation(memberSignUpRequest.getLocation());
+        if (memberRequest.getLocation() != null) {
+            loginUser.setLocation(memberRequest.getLocation());
         }
-        if (memberSignUpRequest.getUseNotification() != null) {
-            loginUser.setUseNotification(memberSignUpRequest.getUseNotification());
+        if (memberRequest.getUseNotification() != null) {
+            loginUser.setUseNotification(memberRequest.getUseNotification());
         }
-        if (memberSignUpRequest.getMotivationType() != null) {
-            loginUser.setMotivationType(memberSignUpRequest.getMotivationType());
+        if (memberRequest.getMotivationType() != null) {
+            loginUser.setMotivationType(memberRequest.getMotivationType());
         }
-        if (memberSignUpRequest.getGender() != null) {
-            loginUser.setGender(memberSignUpRequest.getGender());
+        if (memberRequest.getGender() != null) {
+            loginUser.setGender(memberRequest.getGender());
         }
 //        loginUser.setProfileImageUrl(imageUrl);
         // LoginUserDto를 Member 엔티티로 변환

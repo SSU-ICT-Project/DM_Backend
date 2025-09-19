@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ReturnCode {
-
     // 공통
     SUCCESS(200, "SUCCESS_001", "요청에 성공하였습니다."),
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다."),
@@ -31,6 +30,7 @@ public enum ReturnCode {
     PASSWORD_CHANGE_FAILED(500, "AUTH_011", "비밀번호 변경에 실패했습니다."),
     EMAIL_NOT_VERIFIED(400, "AUTH_012", "이메일 인증을 완료 후 회원가입 진행해주세요."),
     SOCIAL_ACCOUNT_ALREADY_IN_USE(409, "AUTH_013", "이미 사용중인 소셜 계정입니다."),
+    NOT_AUTHORIZED(401, "AUTH_015", "권한이 없습니다."),
 
     // User
     USER_NOT_FOUND(404, "USER_001", "사용자를 찾을 수 없습니다."),
@@ -102,21 +102,6 @@ public enum ReturnCode {
     MAIN_GOAL_NOT_FOUND(404, "GOAL_001", "상위목표를 찾을 수 없습니다."),
     SUB_GOAL_NOT_FOUND(404, "GOAL_002", "하위목표를 찾을 수 없습니다."),
 
-    // Friend
-    FRIEND_LIMIT_EXCEEDED(400, "FRIEND_002", "친구 수가 초과되었습니다."),
-    FRIEND_REQUEST_NOT_FOUND(404, "FRIEND_003", "친구 요청을 찾을 수 없습니다."),
-    CANNOT_FRIEND_SELF(400, "FRIEND_005", "자기 자신을 친구로 추가할 수 없습니다."),
-    BLOCKED_BY_USER(403, "FRIEND_006", "사용자에 의해 차단되었습니다."),
-    REQUESTER_NOT_FOUND(404, "FRIEND_007", "요청자를 찾을 수 없습니다."),
-    RECEIVER_NOT_FOUND(404, "FRIEND_008", "수신자를 찾을 수 없습니다."),
-    FRIEND_UNAUTHORIZED_ACCESS(403, "FRIEND_009", "승낙/취소할 권한이 없습니다."),
-    ALREADY_HANDLED(400, "FRIEND_010", "이미 수락된 요청입니다."),
-    ALREADY_FRIEND(409, "FRIEND_011", "이미 친구입니다."),
-    ALREADY_RECEIVED_REQUEST(409, "FRIEND_012", "이미 친구 요청을 받았습니다."),
-    INVALID_USER_STATE(400, "FRIEND_013", "상대가 유효하지 않은 회원 상태입니다."),
-    NOT_FRIEND(400, "FRIEND_014", "친구가 아닙니다."),
-    FRIEND_NOT_FOUND(404, "FRIEND_015", "해당 정보를 찾을 수 없습니다."),
-
     // Follow
     ALREADY_REQUESTED(409, "FOLLOW_001", "이미 팔로우 요청을 보냈습니다."),
     REQUEST_NOT_FOUND(404, "FOLLOW_002", "팔로우 요청을 찾을 수 없습니다."),
@@ -124,25 +109,18 @@ public enum ReturnCode {
     FOLLOWER_NOT_FOUND(404, "FOLLOW_004", "팔로워를 찾을 수 없습니다."),
     FOLLOW_NOT_FOUND(404, "FOLLOW_005", "팔로우한 사용자를 찾을 수 없습니다."),
 
-    // Board
-    BOARD_NOT_FOUND(404, "BOARD_001", "게시글을 찾을 수 없습니다."),
-
-    // BoardComment
-    BOARDCOMMENT_NOT_FOUND(404, "BOARDCOMMENT_001", "게시글의 댓글을 찾을 수 없습니다."),
-
     // Notification
     NOTIFICATION_NOT_FOUND(404, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다."),
     MAP_TO_JSON_FAILED(500, "NOTIFICATION_002", "맵을 JSON으로 변환하는데 실패했습니다."),
-    NOT_AUTHORIZED(403, "NOTIFICATION_003", "권한이 없습니다."),
-    NAVI_VALIDATE_ERROR(400, "NOTIFICATION_004", "navigationData에 필수 키가 없습니다."),
-    ARGS_VALIDATE_ERROR(400, "NOTIFICATION_005", "메시지 인자가 부족합니다."),
-    NOTIFICATION_DISABLED(400, "NOTIFICATION_006", "실시간 알림이 비활성화 상태입니다."),
+    NAVI_VALIDATE_ERROR(400, "NOTIFICATION_003", "navigationData에 필수 키가 없습니다."),
+    ARGS_VALIDATE_ERROR(400, "NOTIFICATION_004", "메시지 인자가 부족합니다."),
+    NOTIFICATION_DISABLED(400, "NOTIFICATION_005", "실시간 알림이 비활성화 상태입니다."),
 
     // System/Business
     INTERNAL_ERROR(500, "SYS_001", "내부 시스템 에러"),
     API_CALL_FAILED(500, "SYS_002", "외부 API 호출에 실패했습니다."),
 
-    // Search
+    // ELK Search
     DATA_CONVERSION_ERROR(500, "SEARCH_001", "데이터 변환 중 오류가 발생했습니다."),
     SEARCH_POST_ERROR(500, "SEARCH_002", "엘라스틱 서치 검색 중 에러 발생"),
 

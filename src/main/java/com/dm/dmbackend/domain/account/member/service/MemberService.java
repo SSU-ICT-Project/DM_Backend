@@ -2,7 +2,7 @@ package com.dm.dmbackend.domain.account.member.service;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
-import com.dm.dmbackend.domain.account.member.dto.req.MemberSignUpRequest;
+import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
 import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
 import org.springframework.data.domain.Page;
@@ -13,7 +13,7 @@ public interface MemberService {
     void adminSignup(AdminSignUpRequest adminSignUpRequest);
 
     // 회원가입
-    void signup(MemberSignUpRequest memberSignUpRequest);
+    void signup(MemberRequest memberRequest);
 
     // 본인 회원정보 조회
     MemberResponse getMyInfo(LoginUserDto loginUser);
@@ -28,7 +28,7 @@ public interface MemberService {
     DetailMemberResponse getDetailMemberInfo(Long memberId);
 
     // 회원정보 수정
-    void updateMember(MemberSignUpRequest memberSignUpRequest, LoginUserDto loginUser);
+    void updateMember(MemberRequest memberRequest, LoginUserDto loginUser);
 
     // 회원탈퇴
     void deleteMember(LoginUserDto loginUser);
