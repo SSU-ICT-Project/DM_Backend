@@ -21,7 +21,7 @@ spring:
       region:
         static: ap-northeast-2
       s3:
-        bucket: dm-bucket-v-1
+        bucket: dm-bucket-v1
   rag:
     ingest: false
 

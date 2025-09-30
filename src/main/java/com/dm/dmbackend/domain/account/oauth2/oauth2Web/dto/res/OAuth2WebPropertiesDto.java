@@ -12,7 +12,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "app.oauth2")
 @Getter
 @Setter
-public class OAuth2WebProperties {
+public class OAuth2WebPropertiesDto {
     private Map<String, ProviderProperties> providers = new HashMap<>();
 
     @Getter
