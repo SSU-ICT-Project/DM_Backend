@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.util.List;
@@ -51,6 +50,7 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    // 단건 데이터<T>를 받는 성공 응답
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
                 .success(true)
@@ -61,14 +61,14 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    // Spring Page를 바로 받는 성공 응답 (data=content, page=meta)
-    public static <T> ApiResponse<List<T>> success(Page<T> page) {
+    // PageResponse<T>를 받는 성공 응답(캐싱 최적화)
+    public static <T> ApiResponse<List<T>> success(PageResponse<T> pageResponse) {
         return ApiResponse.<List<T>>builder()
                 .success(true)
                 .code(ReturnCode.SUCCESS.getCode())
                 .message(ReturnCode.SUCCESS.getMessage())
-                .data(page.getContent())
-                .page(PageMeta.of(page))
+                .data(pageResponse.getContent())
+                .page(pageResponse.getPageMeta())
                 .timestamp(Instant.now())
                 .build();
     }
