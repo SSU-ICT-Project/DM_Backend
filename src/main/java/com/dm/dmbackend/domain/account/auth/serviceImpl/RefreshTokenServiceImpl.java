@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -19,9 +20,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // Refresh Token 저장
     @Override
     @Transactional
-    public void saveRefreshToken(String memberId, String refreshToken, long duration) {
+    public void saveRefreshToken(String memberId, String refreshToken, Duration duration) {
         ValueOperations<String, Object> ops = redisTemplate.opsForValue();
-        ops.set(memberId, refreshToken, duration, TimeUnit.MILLISECONDS);
+        ops.set(memberId, refreshToken, duration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     // Refresh Token 조회

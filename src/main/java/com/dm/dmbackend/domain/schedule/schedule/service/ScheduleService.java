@@ -4,7 +4,7 @@ package com.dm.dmbackend.domain.schedule.schedule.service;
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.schedule.schedule.dto.req.ScheduleRequest;
 import com.dm.dmbackend.domain.schedule.schedule.dto.res.ScheduleResponse;
-import org.springframework.data.domain.Page;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -24,8 +24,8 @@ public interface ScheduleService  {
     void deleteSchedule(Long scheduleId, LoginUserDto loginUser);
 
     // 날짜별 일정 조회
-    Page<ScheduleResponse> getSchedulesForDate(LocalDate localDate, LoginUserDto loginUser, Pageable pageable);
+    PageResponse<ScheduleResponse> getSchedulesForDate(LocalDate localDate, LoginUserDto loginUser, Pageable pageable);
 
     // 월별 일정 조회
-    Page<ScheduleResponse> getSchedulesForMonth(YearMonth yearMonth, LoginUserDto loginUser, Pageable pageable);
+    PageResponse<ScheduleResponse> getSchedulesForMonth(YearMonth yearMonth, LoginUserDto loginUser, Pageable pageable);
 }

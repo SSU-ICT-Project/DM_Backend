@@ -1,7 +1,7 @@
 package com.dm.dmbackend.global.config;
 
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeCure;
-import com.dm.dmbackend.domain.llm.screenTime.service.ScreenTimeMotivate;
+import com.dm.dmbackend.domain.llm.digitalDetox.service.DigitalDetoxCure;
+import com.dm.dmbackend.domain.llm.digitalDetox.service.DigitalDetoxMotivate;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
@@ -81,7 +81,7 @@ public class LlmConfig {
 
     // 자동 RAG 채워 넣는 augmentor
     @Bean
-    public RetrievalAugmentor screenTimeAugmentor(EmbeddingStoreContentRetriever retriever) {
+    public RetrievalAugmentor digitalDetoxAugmentor(EmbeddingStoreContentRetriever retriever) {
         return DefaultRetrievalAugmentor.builder()
                 .contentRetriever(retriever)
                 .build();
@@ -89,18 +89,18 @@ public class LlmConfig {
 
     // 자동 RAG 연결됨
     @Bean
-    public ScreenTimeCure screenTimeCure(ChatModel chatModel,
-                                           RetrievalAugmentor screenTimeAugmentor) {
-        return AiServices.builder(ScreenTimeCure.class)
+    public DigitalDetoxCure digitalDetoxCure(ChatModel chatModel,
+                                             RetrievalAugmentor digitalDetoxAugmentor) {
+        return AiServices.builder(DigitalDetoxCure.class)
                 .chatModel(chatModel)
-                .retrievalAugmentor(screenTimeAugmentor)
+                .retrievalAugmentor(digitalDetoxAugmentor)
                 .build();
     }
 
     // RAG 사용X
     @Bean
-    public ScreenTimeMotivate screenTimeMotivate(ChatModel chatModel) {
-        return AiServices.builder(ScreenTimeMotivate.class)
+    public DigitalDetoxMotivate digitalDetoxMotivate(ChatModel chatModel) {
+        return AiServices.builder(DigitalDetoxMotivate.class)
                 .chatModel(chatModel)
                 .build();
     }

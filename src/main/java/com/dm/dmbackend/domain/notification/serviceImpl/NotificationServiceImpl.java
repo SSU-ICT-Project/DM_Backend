@@ -7,14 +7,15 @@ import com.dm.dmbackend.domain.notification.dto.res.NotificationResponse;
 import com.dm.dmbackend.domain.notification.entity.Notification;
 import com.dm.dmbackend.domain.notification.repository.NotificationRepository;
 import com.dm.dmbackend.domain.notification.service.NotificationService;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,11 +34,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     // 알림 목록 조회
     @Override
-    @Transactional
-    public Page<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser) {
+    @Transactional(readOnly = true)
+    public PageResponse<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser) {
         checkPageSize(pageable.getPageSize());
         Page<Notification> notificationPage = notificationRepository.findByReceiverIdOrderByCreatedAtDesc(loginUser.getId(), pageable);
-        return notificationPage.map(this::convertToNotificationDto);
+        return PageResponse.of(notificationPage.map(this::convertToNotificationDto));
     }
 
     // 알림 읽음 처리

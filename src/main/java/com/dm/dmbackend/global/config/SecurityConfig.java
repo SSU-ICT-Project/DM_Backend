@@ -1,6 +1,6 @@
 package com.dm.dmbackend.global.config;
 
-import com.dm.dmbackend.domain.account.auth.security.JwtAuthenticationFilter;
+import com.dm.dmbackend.global.security.JwtAuthenticationFilter;
 import com.dm.dmbackend.domain.account.auth.serviceImpl.CustomUserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +41,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/rest-api/v1/auth/login",
+                                "/rest-api/v1/auth/refresh-token",
                                 "/rest-api/v1/oauth2/**",
                                 "/rest-api/v1/member/**",
                                 "/ws/**",

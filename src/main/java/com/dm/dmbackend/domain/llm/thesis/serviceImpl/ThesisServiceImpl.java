@@ -7,13 +7,13 @@ import com.dm.dmbackend.domain.llm.thesis.entity.Thesis;
 import com.dm.dmbackend.domain.llm.thesis.entity.ThesisPage;
 import com.dm.dmbackend.domain.llm.thesis.repository.ThesisRepository;
 import com.dm.dmbackend.domain.llm.thesis.service.ThesisService;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.global.common.utils.validator.RoleValidator;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
 import com.dm.dmbackend.global.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +60,14 @@ public class ThesisServiceImpl implements ThesisService {
     // 논문 조회
     @Override
     @Transactional(readOnly = true)
-    public Page<ThesisResponse> getThesis(Pageable pageable, LoginUserDto loginUser){
+    public PageResponse<ThesisResponse> getThesis(Pageable pageable, LoginUserDto loginUser){
         // ROLE_ADMIN 아닌 경우 예외 처리
         RoleValidator.validateAdmin(loginUser);
         checkPageSize(pageable.getPageSize());
-        Page<Thesis> thesisPage = thesisRepository.findByMemberId(loginUser.getId(), pageable);
-        return thesisPage.map(this::convertToThesisResponse);
+        return PageResponse.of(
+                thesisRepository.findByMemberId(loginUser.getId(), pageable)
+                        .map(this::convertToThesisResponse)
+        );
     }
 
     // 논문 삭제
