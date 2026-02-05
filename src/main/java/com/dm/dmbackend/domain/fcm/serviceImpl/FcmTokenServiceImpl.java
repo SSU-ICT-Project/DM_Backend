@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -19,7 +20,7 @@ public class FcmTokenServiceImpl implements FcmTokenService {
     private static final String FCM_TOKEN_PREFIX = "fcm:"; // Redis key prefix
 
     @Value("${custom.refreshToken.expiration}")
-    private long refreshTokenExpiration; // FCM 토큰 만료 시간
+    private Duration refreshTokenExpiration; // FCM 토큰 만료 시간
 
     // FCM Token 조회
     @Override
@@ -37,7 +38,7 @@ public class FcmTokenServiceImpl implements FcmTokenService {
     public void saveFcmToken(Long memberId, String fcmToken) {
         ValueOperations<String, Object> ops = redisTemplate.opsForValue();
         String key = getFcmTokenKey(memberId);
-        ops.set(key, fcmToken, refreshTokenExpiration, TimeUnit.MILLISECONDS);
+        ops.set(key, fcmToken, refreshTokenExpiration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     // FCM Token 삭제

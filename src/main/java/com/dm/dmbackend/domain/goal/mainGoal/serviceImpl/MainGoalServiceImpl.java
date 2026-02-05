@@ -12,6 +12,7 @@ import com.dm.dmbackend.domain.goal.subGoal.dto.res.SubGoalResponse;
 import com.dm.dmbackend.domain.goal.subGoal.entity.SubGoal;
 import com.dm.dmbackend.domain.goal.subGoal.repository.SubGoalRepository;
 import com.dm.dmbackend.domain.goal.subGoal.service.SubGoalService;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class MainGoalServiceImpl implements MainGoalService {
     // 목표 전체 리스트 조회
     @Override
     @Transactional(readOnly = true)
-    public Page<MainGoalWithSubGoalsResponse> getAllGoal(Pageable pageable, LoginUserDto loginUser) {
+    public PageResponse<MainGoalWithSubGoalsResponse> getAllGoal(Pageable pageable, LoginUserDto loginUser) {
         checkPageSize(pageable.getPageSize());
 
         // 1) 메인 목표 페이지 조회 (DB에서 NULLS LAST 처리)
@@ -86,7 +87,12 @@ public class MainGoalServiceImpl implements MainGoalService {
                     .build());
         }
         // 6) Page로 감싸서 반환
-        return new PageImpl<>(content, mainPage.getPageable(), mainPage.getTotalElements());
+        Page<MainGoalWithSubGoalsResponse> page = new PageImpl<>(
+                content,
+                mainPage.getPageable(),
+                mainPage.getTotalElements()
+        );
+        return PageResponse.of(page);
     }
 
     // 상위목표 조회(RAG용)

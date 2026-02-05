@@ -9,8 +9,8 @@ public interface AuthService {
     LoginResponse login(LoginRequest loginRequest, boolean isSocialLogin);
 
     // 로그아웃
-    void logout(LoginUserDto loginUser);
+    void logout(LoginUserDto loginUser, String accessToken);
 
     // accessToken 재발급
-    LoginResponse refreshToken(String refreshToken, LoginUserDto loginUser);
+    LoginResponse refreshToken(String refreshToken);
 }

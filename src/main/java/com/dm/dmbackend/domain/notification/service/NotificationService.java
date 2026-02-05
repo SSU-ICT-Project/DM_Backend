@@ -4,7 +4,7 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.notification.dto.req.NotificationRequest;
 import com.dm.dmbackend.domain.notification.dto.res.NotificationResponse;
 import com.dm.dmbackend.domain.notification.entity.Notification;
-import org.springframework.data.domain.Page;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -12,7 +12,7 @@ public interface NotificationService {
     void createNotification(Notification notification);
 
     // 알림 목록 조회
-    Page<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser);
+    PageResponse<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser);
 
     // 알림 읽음 처리
     void markAsRead(NotificationRequest notificationRequest, LoginUserDto loginUser);

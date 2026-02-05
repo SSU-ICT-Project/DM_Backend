@@ -11,6 +11,7 @@ import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
 import com.dm.dmbackend.domain.schedule.schedule.entity.SchedulePage;
 import com.dm.dmbackend.domain.schedule.schedule.repository.ScheduleRepository;
 import com.dm.dmbackend.domain.schedule.schedule.service.ScheduleService;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.service.ScheduleMessageService;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
@@ -141,28 +142,28 @@ public class ScheduleServicelmpl implements ScheduleService {
 
     // 날짜별 일정 조회
     @Override
-    @Transactional
-    public Page<ScheduleResponse> getSchedulesForDate(LocalDate localDate, LoginUserDto loginUser, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageResponse<ScheduleResponse> getSchedulesForDate(LocalDate localDate, LoginUserDto loginUser, Pageable pageable) {
         Member member = memberRepository.findById(loginUser.getId())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         checkPageSize(pageable.getPageSize());
         LocalDateTime startOfDay = localDate.atStartOfDay();
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         Page<Schedule> schedulePage = scheduleRepository.findByMemberAndScheduleStartTimeBetweenOrderByScheduleStartTimeAsc(member,startOfDay, endOfDay, pageable);
-        return schedulePage.map(this::convertToScheduleResponse);
+        return PageResponse.of(schedulePage.map(this::convertToScheduleResponse));
     }
 
     // 월별 일정 조회
     @Override
-    @Transactional
-    public Page<ScheduleResponse> getSchedulesForMonth(YearMonth yearMonth, LoginUserDto loginUserDto,Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageResponse<ScheduleResponse> getSchedulesForMonth(YearMonth yearMonth, LoginUserDto loginUserDto,Pageable pageable) {
         Member member = memberRepository.findById(loginUserDto.getId())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
         checkPageSize(pageable.getPageSize());
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
         Page<Schedule> schedulePage = scheduleRepository.findByMemberAndScheduleStartTimeBetweenOrderByScheduleStartTimeAsc(member,startOfMonth, endOfMonth,pageable);
-        return schedulePage.map(this::convertToScheduleResponse);
+        return PageResponse.of(schedulePage.map(this::convertToScheduleResponse));
     }
 
     // ----------------- 헬퍼 메서드 -----------------

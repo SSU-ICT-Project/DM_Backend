@@ -5,7 +5,7 @@ import com.dm.dmbackend.domain.account.member.dto.req.AdminSignUpRequest;
 import com.dm.dmbackend.domain.account.member.dto.req.MemberRequest;
 import com.dm.dmbackend.domain.account.member.dto.res.DetailMemberResponse;
 import com.dm.dmbackend.domain.account.member.dto.res.MemberResponse;
-import org.springframework.data.domain.Page;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface MemberService {
@@ -31,10 +31,10 @@ public interface MemberService {
     void updateMember(MemberRequest memberRequest, LoginUserDto loginUser);
 
     // 회원탈퇴
-    void deleteMember(LoginUserDto loginUser);
+    void deleteMember(LoginUserDto loginUser, String accessToken);
 
     // 회원 검색하기
-    Page<MemberResponse> searchMemberInfo(Pageable pageable, String keyword);
+    PageResponse<MemberResponse> searchMemberInfo(Pageable pageable, String keyword);
 
     // 팔로우 요청하기
     void followReq(Long memberId, LoginUserDto loginUser);

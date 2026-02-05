@@ -16,6 +16,7 @@ import com.dm.dmbackend.domain.account.member.repository.MemberFollowReqReposito
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
 import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
 import com.dm.dmbackend.global.s3.S3Service;
@@ -189,9 +190,9 @@ public class MemberServiceImpl implements MemberService {
     // 회원탈퇴
     @Override
     @Transactional
-    public void deleteMember(LoginUserDto loginUser) {
+    public void deleteMember(LoginUserDto loginUser, String accessToken) {
         // refreshToken 삭제
-        authService.logout(loginUser);
+        authService.logout(loginUser, accessToken);
         // DB에서 회원 조회
         Member memberEntity = memberRepository.findById(loginUser.getId())
                 .orElseThrow(() -> new ServiceException(ReturnCode.USER_NOT_FOUND));
@@ -203,11 +204,11 @@ public class MemberServiceImpl implements MemberService {
 
     // 회원 검색하기
     @Override
-    @Transactional
-    public Page<MemberResponse> searchMemberInfo(Pageable pageable, String keyword){
+    @Transactional(readOnly = true)
+    public PageResponse<MemberResponse> searchMemberInfo(Pageable pageable, String keyword){
         checkPageSize(pageable.getPageSize());
         Page<Member> members = memberRepository.findByKeyword(pageable, keyword);
-        return members.map(this::memberConvertToMemberInfo);
+        return PageResponse.of(members.map(this::memberConvertToMemberInfo));
     }
 
     // 팔로우 요청하기

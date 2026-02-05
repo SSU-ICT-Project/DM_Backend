@@ -5,7 +5,7 @@ import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.schedule.schedule.dto.req.ScheduleRequest;
 import com.dm.dmbackend.domain.schedule.schedule.dto.res.ScheduleResponse;
 import com.dm.dmbackend.domain.schedule.schedule.entity.SchedulePage;
-import com.dm.dmbackend.domain.schedule.schedule.servicelmpl.ScheduleServicelmpl;
+import com.dm.dmbackend.domain.schedule.schedule.service.ScheduleService;
 import com.dm.dmbackend.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,8 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Schedule", description = "일정 API")
 public class ScheduleController {
-    private final ScheduleServicelmpl scheduleService;
-    private final ScheduleServicelmpl scheduleServicelmpl;
+    private final ScheduleService scheduleService;
 
     // 일정 생성
     @PostMapping
@@ -55,7 +54,7 @@ public class ScheduleController {
     @DeleteMapping("/{scheduleId}")
     @Operation(summary = "일정 삭제")
     public ApiResponse<Void> deleteSchedule(@PathVariable Long scheduleId, @LoginUser LoginUserDto loginUser) {
-        scheduleServicelmpl.deleteSchedule(scheduleId, loginUser);
+        scheduleService.deleteSchedule(scheduleId, loginUser);
         return ApiResponse.success();
     }
 
@@ -72,7 +71,7 @@ public class ScheduleController {
     // 월별 일정 조회
     @GetMapping("/month")
     @Operation(summary = "월별 일정 조회")
-    public ApiResponse<List<ScheduleResponse>>findSchedulesByMonth(@RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM")
+    public ApiResponse<List<ScheduleResponse>> findSchedulesByMonth(@RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM")
                                                             YearMonth yearMonth, @LoginUser LoginUserDto loginUser,
                                                              @ModelAttribute SchedulePage schedulePage) {
         Pageable pageable = PageRequest.of(schedulePage.getPage(), schedulePage.getSize());
