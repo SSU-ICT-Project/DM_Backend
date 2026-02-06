@@ -2,20 +2,26 @@ package com.dm.dmbackend.global.redis;
 
 import com.dm.dmbackend.domain.account.member.entity.Member;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
-import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.dm.dmbackend.domain.notification.dto.NotificationPayload;
+import com.dm.dmbackend.domain.notification.factory.NotificationPayloadFactory;
 import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
 import com.dm.dmbackend.domain.schedule.schedule.repository.ScheduleRepository;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.dto.ScheduleMessageRedisDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.dm.dmbackend.domain.schedule.scheduleMessage.entity.ScheduleMessage;
+import com.dm.dmbackend.domain.schedule.scheduleMessage.repository.ScheduleMessageRepository;
+import com.dm.dmbackend.global.kafka.event.notification.NotificationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import static com.dm.dmbackend.global.constants.KafkaKey.SCHEDULE_NOTIFICATION_TOPIC;
 
 @Slf4j
 @Component
@@ -23,9 +29,9 @@ import java.util.Set;
 public class ScheduleMessageWorker {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
+    private final ScheduleMessageRepository scheduleMessageRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final NotificationEventPublisher notificationEventPublisher;
     private static final String REDIS_KEY = "schedule:messages";
 
     // 1분마다 실행
@@ -36,34 +42,41 @@ public class ScheduleMessageWorker {
         long maxScore = now + window;
 
         // Redis ZSET에서 지금 보낼 메시지 조회
-        Set<Object> dueMessages = redisTemplate.opsForZSet().rangeByScore(REDIS_KEY, 0, maxScore);
-        if (dueMessages == null || dueMessages.isEmpty()) {
+        Set<Object> dueMessageIds = redisTemplate.opsForZSet().rangeByScore(REDIS_KEY, 0, maxScore);
+        if (dueMessageIds == null || dueMessageIds.isEmpty()) {
             return;
         }
-        for (Object msgObj : dueMessages) {
+        List<Long> ids = new ArrayList<>(dueMessageIds.size());
+        for (Object idObj : dueMessageIds) {
             try {
-                String json = (String) msgObj;
-                ScheduleMessageRedisDto dto = objectMapper.readValue(json, ScheduleMessageRedisDto.class);
-                Schedule schedule = scheduleRepository.findById(dto.getScheduleId()).orElseThrow();
-                Member member = memberRepository.findById(dto.getMemberId()).orElseThrow();
-                // 일정 알림 생성 완료
-                Notification notification = Notification.builder()
-                        .senderId(member.getId())
-                        .senderNickname(member.getNickname())
-                        .senderProfileUrl(member.getProfileImageUrl())
-                        .receiverId(member.getId())
-                        .objectId(dto.getId())
-                        .content(dto.getMessage())
-                        .targetObject(Notification.TargetObject.SCHEDULE)
+                ids.add(Long.valueOf(String.valueOf(idObj)));
+            } catch (NumberFormatException e) {
+                log.warn("Invalid scheduleMessageId in Redis ZSET: {}", idObj);
+            }
+        }
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<ScheduleMessage> scheduleMessages = scheduleMessageRepository.findAllById(ids);
+        for (ScheduleMessage scheduleMessage : scheduleMessages) {
+            try {
+                Long scheduleId = scheduleMessage.getSchedule().getId();
+                Long memberId = scheduleMessage.getMember().getId();
+                Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+                Member member = memberRepository.findById(memberId).orElseThrow();
+                ScheduleMessageRedisDto dto = ScheduleMessageRedisDto.builder()
+                        .id(scheduleMessage.getId())
+                        .message(scheduleMessage.getMessage())
                         .build();
+                // 일정 알림 생성 완료
+                NotificationPayload payload = NotificationPayloadFactory.scheduleMessage(member, dto);
                 schedule.setNotified(true);
                 scheduleRepository.save(schedule);
                 // 일정 알림 이벤트 생성 완료
-                String kafkaMessage = objectMapper.writeValueAsString(notification);
-                kafkaTemplate.send("schedule-topic", kafkaMessage);
+                notificationEventPublisher.publishNotification(payload, SCHEDULE_NOTIFICATION_TOPIC);
                 // 발송 완료된 메시지는 Redis에서 제거
-                redisTemplate.opsForZSet().remove(REDIS_KEY, json);
-                log.info("Sent scheduled message to Kafka. scheduleId={}", dto.getId());
+                redisTemplate.opsForZSet().remove(REDIS_KEY, String.valueOf(scheduleMessage.getId()));
+                log.info("Published scheduled notification event. scheduleMessageId={}", scheduleMessage.getId());
             } catch (Exception e) {
                 log.error("Failed to process scheduled message: {}", e.getMessage());
             }

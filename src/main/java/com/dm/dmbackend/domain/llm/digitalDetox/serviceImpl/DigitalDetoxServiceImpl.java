@@ -10,15 +10,17 @@ import com.dm.dmbackend.domain.llm.digitalDetox.repository.DigitalDetoxRepositor
 import com.dm.dmbackend.domain.llm.digitalDetox.service.DigitalDetoxCure;
 import com.dm.dmbackend.domain.llm.digitalDetox.service.DigitalDetoxMotivate;
 import com.dm.dmbackend.domain.llm.digitalDetox.service.DigitalDetoxService;
-import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.dm.dmbackend.domain.notification.dto.NotificationPayload;
+import com.dm.dmbackend.domain.notification.factory.NotificationPayloadFactory;
 import com.dm.dmbackend.global.common.utils.validator.NotificationValidator;
+import com.dm.dmbackend.global.kafka.event.notification.NotificationEventPublisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,7 +29,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
+import static com.dm.dmbackend.global.constants.KafkaKey.CURE_NOTIFICATION_TOPIC;
+import static com.dm.dmbackend.global.constants.KafkaKey.MOTIVATE_NOTIFICATION_TOPIC;
+
 @Service
 @RequiredArgsConstructor
 public class DigitalDetoxServiceImpl implements DigitalDetoxService {
@@ -35,7 +39,7 @@ public class DigitalDetoxServiceImpl implements DigitalDetoxService {
     private final MainGoalService mainGoalService;
     private final DigitalDetoxCure cure;
     private final DigitalDetoxMotivate motivate;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final NotificationEventPublisher notificationEventPublisher;
     private final ObjectMapper objectMapper;
 
     // 중독 치료 메시지 생성
@@ -44,6 +48,7 @@ public class DigitalDetoxServiceImpl implements DigitalDetoxService {
     public void getDigitalDetoxCure(DigitalDetoxCureRequest digitalDetoxCureRequest,
                                     LoginUserDto loginUser) {
         String ragInput = toCureRagPayload(digitalDetoxCureRequest);
+        Member member = loginUser.ConvertToMember();
         UserContextDto ctx = buildUserContext(loginUser);
         String ragQuery = buildRagQuery(loginUser.getMotivationType()); // 검색 전용 짧은 질의
         // 자동 RAG 호출 (Retriever가 pgvector에서 문맥을 가져와 {{information}}에 자동 주입)
@@ -56,30 +61,22 @@ public class DigitalDetoxServiceImpl implements DigitalDetoxService {
         cureMessage = cureMessage.replaceAll("\\s*\\n\\s*", " ");
         // DB 저장
         DigitalDetox digitalDetox = DigitalDetox.builder()
-                .member(loginUser.ConvertToMember())
+                .member(member)
                 .screenTimeData(ragInput)
                 .message(cureMessage)
                 .messageType(DigitalDetox.MessageType.CURE)
                 .build();
         digitalDetoxRepository.save(digitalDetox);
         // 중독 치료 메시지 알림 생성
-        Notification notification = Notification.builder()
-                .senderId(loginUser.getId())
-                .senderNickname(loginUser.getNickname())
-                .senderProfileUrl(loginUser.getProfileImageUrl())
-                .receiverId(loginUser.getId())
-                .objectId(digitalDetox.getId())
-                .content(cureMessage)
-                .targetObject(Notification.TargetObject.CURE)
-                .build();
+        NotificationPayload payload = NotificationPayloadFactory.digitalDetoxCure(member, digitalDetox);
         NotificationValidator.validateNotification(loginUser);
-        // 중독 치료 메시지 이벤트 생성
-        try {
-            String message = objectMapper.writeValueAsString(notification);
-            kafkaTemplate.send("cure-topic", message);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize Notification: {}", e.getMessage());
-        }
+        // 커밋 이후에만 발행 (롤백 시 이벤트 발행 방지)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notificationEventPublisher.publishNotification(payload, CURE_NOTIFICATION_TOPIC);
+            }
+        });
     }
 
     // 동기부여 메시지 생성
@@ -88,6 +85,7 @@ public class DigitalDetoxServiceImpl implements DigitalDetoxService {
     public void getDigitalDetoxMotivate(LoginUserDto loginUser) {
         NotificationValidator.validateNotification(loginUser);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        Member member = loginUser.ConvertToMember();
         UserContextDto ctx = buildUserContext(loginUser);
         // 동기부여 메시지 생성 (goal_detail 주입!)
         String motivateMessage = motivate.message(
@@ -99,29 +97,21 @@ public class DigitalDetoxServiceImpl implements DigitalDetoxService {
         motivateMessage = motivateMessage.replaceAll("\\s*\\n\\s*", " ");
         // DB 저장
         DigitalDetox digitalDetox = DigitalDetox.builder()
-                .member(loginUser.ConvertToMember())
+                .member(member)
                 .message(motivateMessage)
                 .messageType(DigitalDetox.MessageType.MOTIVATE)
                 .build();
         digitalDetoxRepository.save(digitalDetox);
         // 동기부여 메시지 알림 생성
-        Notification notification = Notification.builder()
-                .senderId(loginUser.getId())
-                .senderNickname(loginUser.getNickname())
-                .senderProfileUrl(loginUser.getProfileImageUrl())
-                .receiverId(loginUser.getId())
-                .objectId(digitalDetox.getId())
-                .content(motivateMessage)
-                .targetObject(Notification.TargetObject.MOTIVATE)
-                .build();
+        NotificationPayload payload = NotificationPayloadFactory.digitalDetoxMotivate(member, digitalDetox);
         NotificationValidator.validateNotification(loginUser);
-        // 동기부여 메시지 이벤트 생성
-        try {
-            String message = objectMapper.writeValueAsString(notification);
-            kafkaTemplate.send("motivate-topic", message);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize Notification: {}", e.getMessage());
-        }
+        // 커밋 이후에만 발행 (롤백 시 이벤트 발행 방지)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notificationEventPublisher.publishNotification(payload, MOTIVATE_NOTIFICATION_TOPIC);
+            }
+        });
     }
 
     // ----------------- 헬퍼 메서드 -----------------

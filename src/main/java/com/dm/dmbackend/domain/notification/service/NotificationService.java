@@ -8,8 +8,8 @@ import com.dm.dmbackend.global.common.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
-    // 알림 생성
-    void createNotification(Notification notification);
+    // Kafka 수신 메시지 저장 & FCM 전송
+    void createAndNotifyFromMessage(String message, String title);
 
     // 알림 목록 조회
     PageResponse<NotificationResponse> getNotifications(Pageable pageable, LoginUserDto loginUser);

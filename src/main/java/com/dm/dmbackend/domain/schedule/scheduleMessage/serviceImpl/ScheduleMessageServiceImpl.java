@@ -2,12 +2,9 @@ package com.dm.dmbackend.domain.schedule.scheduleMessage.serviceImpl;
 
 import com.dm.dmbackend.domain.account.auth.loginUser.LoginUserDto;
 import com.dm.dmbackend.domain.schedule.schedule.entity.Schedule;
-import com.dm.dmbackend.domain.schedule.scheduleMessage.dto.ScheduleMessageRedisDto;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.entity.ScheduleMessage;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.repository.ScheduleMessageRepository;
 import com.dm.dmbackend.domain.schedule.scheduleMessage.service.ScheduleMessageService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,7 +20,6 @@ import java.time.ZoneId;
 public class ScheduleMessageServiceImpl implements ScheduleMessageService {
     private final ScheduleMessageRepository scheduleMessageRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
     private static final String REDIS_KEY = "schedule:messages";
 
     // 일정 알림 예약 생성
@@ -37,22 +33,10 @@ public class ScheduleMessageServiceImpl implements ScheduleMessageService {
                 .scheduleTime(scheduleTime)
                 .build();
         scheduleMessageRepository.save(scheduleMessage);
-        try {
-            ScheduleMessageRedisDto dto = ScheduleMessageRedisDto.builder()
-                    .id(scheduleMessage.getId())
-                    .scheduleId(schedule.getId())
-                    .memberId(loginUser.getId())
-                    .message(message)
-                    .scheduleTime(scheduleTime)
-                    .build();
-            // JSON 직렬화
-            String jsonValue = objectMapper.writeValueAsString(dto);
-            // Redis ZSET에 저장 (score = epoch milli)
-            double score = scheduleTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            redisTemplate.opsForZSet().add(REDIS_KEY, jsonValue, score);
-            log.info("ScheduleMessage saved to Redis ZSET. scheduleId={}, score={}", scheduleMessage.getId(), score);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize ScheduleMessage: {}", e.getMessage());
-        }
+        // Redis ZSET에 ID만 저장 (score = epoch milli)
+        double score = scheduleTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        String value = String.valueOf(scheduleMessage.getId());
+        redisTemplate.opsForZSet().add(REDIS_KEY, value, score);
+        log.info("ScheduleMessage id saved to Redis ZSET. scheduleMessageId={}, score={}", scheduleMessage.getId(), score);
     }
 }

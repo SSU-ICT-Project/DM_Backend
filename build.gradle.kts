@@ -65,6 +65,10 @@ dependencies {
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
+    // MapStruct
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
     // jsonb <-> Map, List
     implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
 
