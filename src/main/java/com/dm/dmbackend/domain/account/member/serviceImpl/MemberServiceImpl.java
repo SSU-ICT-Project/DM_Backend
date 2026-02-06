@@ -15,24 +15,27 @@ import com.dm.dmbackend.domain.account.member.repository.MemberFollowRepository;
 import com.dm.dmbackend.domain.account.member.repository.MemberFollowReqRepository;
 import com.dm.dmbackend.domain.account.member.repository.MemberRepository;
 import com.dm.dmbackend.domain.account.member.service.MemberService;
-import com.dm.dmbackend.domain.notification.entity.Notification;
+import com.dm.dmbackend.domain.notification.dto.NotificationPayload;
+import com.dm.dmbackend.domain.notification.factory.NotificationPayloadFactory;
 import com.dm.dmbackend.global.common.response.PageResponse;
 import com.dm.dmbackend.global.exception.ReturnCode;
 import com.dm.dmbackend.global.exception.ServiceException;
-import com.dm.dmbackend.global.s3.S3Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.dm.dmbackend.global.kafka.event.notification.NotificationEventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.stream.Collectors;
+
+import static com.dm.dmbackend.global.constants.KafkaKey.FOLLOW_NOTIFICATION_TOPIC;
 
 @Slf4j
 @Service
@@ -43,8 +46,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthService authService;
     private final MemberFollowReqRepository memberFollowReqRepository;
     private final MemberFollowRepository memberFollowRepository;
-    private final S3Service s3Service;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final NotificationEventPublisher notificationEventPublisher;
     private final ObjectMapper objectMapper;
 
     // 회원가입 [가데이터/초기관리자 생성]
@@ -233,22 +235,15 @@ public class MemberServiceImpl implements MemberService {
                 .followRec(followRec)
                 .build();
         memberFollowReqRepository.save(memberFollowReq);
-        // 팔로우 요청 이벤트 생성
-        Notification notification = Notification.builder()
-                .senderId(followReq.getId())
-                .senderNickname(followReq.getNickname())
-                .senderProfileUrl(followReq.getProfileImageUrl())
-                .receiverId(followRec.getId())
-                .objectId(memberFollowReq.getId())
-                .content("님이 팔로우를 요청하였습니다.")
-                .targetObject(Notification.TargetObject.FOLLOW)
-                .build();
-        try {
-            String message = objectMapper.writeValueAsString(notification);
-            kafkaTemplate.send("follow-topic", message);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize Notification: {}", e.getMessage());
-        }
+        NotificationPayload payload = NotificationPayloadFactory.memberFollowRequest(followReq, followRec, memberFollowReq);
+
+        // 커밋 이후에만 발행 (롤백 시 이벤트 발행 방지)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notificationEventPublisher.publishNotification(payload, FOLLOW_NOTIFICATION_TOPIC);
+            }
+        });
     }
 
     // 팔로우 요청 취소하기
@@ -278,22 +273,15 @@ public class MemberServiceImpl implements MemberService {
                 .followed(receiver)
                 .build();
         memberFollowRepository.save(memberFollow);
-        // 팔로우 수락 이벤트 생성
-        Notification notification = Notification.builder()
-                .senderId(loginUser.getId())
-                .senderNickname(loginUser.getNickname())
-                .senderProfileUrl(loginUser.getProfileImageUrl())
-                .receiverId(memberId)
-                .objectId(memberFollow.getId())
-                .content("님이 팔로우 요청을 수락하였습니다.")
-                .targetObject(Notification.TargetObject.FOLLOW)
-                .build();
-        try {
-            String message = objectMapper.writeValueAsString(notification);
-            kafkaTemplate.send("follow-topic", message);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize Notification: {}", e.getMessage());
-        }
+        NotificationPayload payload = NotificationPayloadFactory.memberFollowAccepted(receiver, requester, memberFollow);
+
+        // 커밋 이후에만 발행 (롤백 시 이벤트 발행 방지)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notificationEventPublisher.publishNotification(payload, FOLLOW_NOTIFICATION_TOPIC);
+            }
+        });
     }
 
     // 팔로우 요청 거절하기

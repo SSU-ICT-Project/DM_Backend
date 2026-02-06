@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class FcmMessageResponse {
+    private String eventId;
     private String targetToken;
     private String title;
     private String body;
